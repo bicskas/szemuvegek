@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Szemüvegkatalógus</title>
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+  :root{
+    --bg:#f6f4f0; --card:#ffffff; --ink:#1c1a17; --muted:#7a746b;
+    --accent:#9a7b3f; --line:#e6e1d8;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:Georgia,'Times New Roman',serif; background:var(--bg); color:var(--ink); line-height:1.6;}
+  header{text-align:center; padding:56px 20px 36px;}
+  header h1{font-size:2.4rem; font-weight:normal; letter-spacing:.12em; text-transform:uppercase;}
+  header p{color:var(--muted); margin-top:8px; font-style:italic;}
+  .brand{max-width:1100px; margin:0 auto; padding:0 20px 20px;}
+  .brand > h2{
+    font-size:1.05rem; letter-spacing:.25em; text-transform:uppercase; color:var(--accent);
+    border-bottom:1px solid var(--line); padding:28px 0 10px; margin-bottom:24px;
+  }
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:10px;
+    padding:32px; margin-bottom:32px; box-shadow:0 2px 10px rgba(0,0,0,.04);
+  }
+  .card-head{display:flex; flex-wrap:wrap; align-items:baseline; gap:12px; margin-bottom:4px;}
+  .card-head h3{font-size:1.6rem; font-weight:normal; letter-spacing:.05em;}
+  .badge{
+    font-family:Arial,sans-serif; font-size:.68rem; letter-spacing:.14em; text-transform:uppercase;
+    background:var(--ink); color:#fff; padding:4px 10px; border-radius:20px;
+  }
+  .badge.sun{background:#4a4033;}
+  .badge.soon{background:#a0522d;}
+  .badge.new{background:#3d5a4a;}
+  .badge.out{background:#8a1f1f;}
+  .pdf-link{margin:2px 0 14px; font-family:Arial,sans-serif; font-size:.78rem; letter-spacing:.06em;}
+  .pdf-link a{color:var(--accent); text-decoration:none; border-bottom:1px solid var(--line);}
+  .pdf-link a:hover{border-bottom-color:var(--accent);}
+  .price{font-size:1.05rem; color:var(--accent); margin-left:auto; white-space:nowrap;}
+  .variant{color:var(--muted); font-size:.95rem; margin-bottom:16px;}
+  .gallery{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin:18px 0;}
+  .gallery a{display:block; border:1px solid var(--line); border-radius:6px; overflow:hidden; background:#fff;}
+  .gallery img{width:100%; height:200px; object-fit:contain; display:block; transition:transform .25s;}
+  .gallery a:hover img{transform:scale(1.05);}
+  .desc{margin:14px 0 18px; font-size:1.02rem;}
+  details{border-top:1px solid var(--line); padding-top:12px;}
+  summary{
+    cursor:pointer; font-family:Arial,sans-serif; font-size:.75rem; letter-spacing:.18em;
+    text-transform:uppercase; color:var(--muted); margin-bottom:10px;
+  }
+  table{width:100%; border-collapse:collapse; font-size:.92rem; margin-top:8px;}
+  td{padding:6px 10px; border-bottom:1px solid var(--line); vertical-align:top;}
+  td:first-child{width:220px; color:var(--muted); font-family:Arial,sans-serif; font-size:.8rem;
+    letter-spacing:.05em; text-transform:uppercase; padding-top:9px;}
+  .note{font-size:.85rem; color:var(--muted); font-style:italic; margin-top:10px;}
+  footer{text-align:center; color:var(--muted); font-size:.8rem; padding:30px 20px 50px;}
+  @media (max-width:640px){ .card{padding:20px;} .price{margin-left:0;} }
+
+  /* ---- Lightbox (nagy lapozó) ---- */
+  .lightbox{
+    position:fixed; inset:0; background:rgba(20,18,15,.94); z-index:1000;
+    display:none; align-items:center; justify-content:center;
+  }
+  .lightbox.open{display:flex;}
+  .lightbox img{
+    max-width:92vw; max-height:86vh; object-fit:contain; display:block;
+    border-radius:4px; box-shadow:0 10px 40px rgba(0,0,0,.6); background:#fff;
+  }
+  .lb-btn{
+    position:absolute; top:50%; transform:translateY(-50%);
+    background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.25);
+    color:#fff; font-size:2rem; line-height:1; width:56px; height:56px;
+    border-radius:50%; cursor:pointer; user-select:none;
+    display:flex; align-items:center; justify-content:center; transition:background .2s;
+  }
+  .lb-btn:hover{background:rgba(255,255,255,.28);}
+  .lb-prev{left:24px;} .lb-next{right:24px;}
+  .lb-close{
+    position:absolute; top:18px; right:24px; transform:none;
+    width:44px; height:44px; font-size:1.4rem;
+  }
+  .lb-caption{
+    position:absolute; bottom:20px; left:50%; transform:translateX(-50%);
+    color:#fff; font-family:Arial,sans-serif; font-size:.85rem; letter-spacing:.05em;
+    background:rgba(0,0,0,.45); padding:6px 16px; border-radius:20px; white-space:nowrap;
+    max-width:90vw; overflow:hidden; text-overflow:ellipsis;
+  }
+  @media (max-width:640px){
+    .lb-btn{width:44px; height:44px; font-size:1.5rem;}
+    .lb-prev{left:8px;} .lb-next{right:8px;}
+  }
+
+  /* ---- Összehasonlító nézet ---- */
+  .compare{max-width:1100px; margin:0 auto; padding:0 20px 40px;}
+  .compare > h2{
+    font-size:1.05rem; letter-spacing:.25em; text-transform:uppercase; color:var(--accent);
+    border-bottom:1px solid var(--line); padding:28px 0 10px; margin-bottom:24px;
+  }
+  .compare-grid{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:14px;
+  }
+  .compare-item{
+    background:var(--card); border:1px solid var(--line); border-radius:10px;
+    padding:14px; text-align:center; cursor:pointer; transition:box-shadow .2s, transform .2s;
+  }
+  .compare-item:hover{box-shadow:0 6px 18px rgba(0,0,0,.1); transform:translateY(-3px);}
+  .compare-item img{width:100%; height:130px; object-fit:contain; display:block; margin-bottom:10px;}
+  .compare-item .c-name{font-size:1rem; letter-spacing:.04em;}
+  .compare-item .c-info{
+    font-family:Arial,sans-serif; font-size:.72rem; color:var(--muted);
+    letter-spacing:.06em; text-transform:uppercase; margin-top:4px;
+  }
+  .compare-item .c-price{color:var(--accent); font-size:.9rem; margin-top:4px;}
+
+  /* ---- PDF modal ---- */
+  .pdf-modal{position:fixed; inset:0; background:rgba(20,18,15,.94); z-index:1100; display:none; align-items:center; justify-content:center;}
+  .pdf-modal.open{display:flex;}
+  .pdf-box{width:96vw; height:94vh; background:#fff; border-radius:8px; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 10px 40px rgba(0,0,0,.6);}
+  .pdf-bar{display:flex; align-items:center; gap:8px; padding:10px 14px; background:var(--ink); color:#fff; font-family:Arial,sans-serif;}
+  .pdf-title{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:.9rem; letter-spacing:.04em;}
+  .pdf-bar button, .pdf-bar a.pdf-btn, .pdf-select{
+    background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.25); color:#fff; border-radius:6px;
+    padding:6px 12px; cursor:pointer; font-size:.8rem; font-family:Arial,sans-serif; text-decoration:none; white-space:nowrap;}
+  .pdf-bar button:hover, .pdf-bar a.pdf-btn:hover{background:rgba(255,255,255,.28);}
+  .pdf-select{display:none; max-width:46vw;} .pdf-select option{color:#000;}
+  .pdf-body{flex:1; display:flex; min-height:0;}
+  .pdf-side{width:250px; flex:none; overflow:auto; background:var(--bg); border-right:1px solid var(--line); padding:6px 0 14px; font-family:Arial,sans-serif;}
+  .pdf-side h4{font-size:.68rem; letter-spacing:.18em; text-transform:uppercase; color:var(--accent); padding:14px 16px 4px; font-weight:normal;}
+  .pdf-side button{display:block; width:100%; text-align:left; background:none; border:0; border-left:3px solid transparent;
+    padding:7px 16px; font-size:.84rem; color:var(--ink); cursor:pointer; font-family:inherit;}
+  .pdf-side button:hover{background:#ece8df;}
+  .pdf-side button.active{background:#fff; border-left-color:var(--accent); font-weight:bold;}
+  .pdf-frame-wrap{flex:1; position:relative; background:#e9e6df; min-width:0;}
+  .pdf-frame-wrap iframe{position:absolute; inset:0; width:100%; height:100%; border:0; background:#fff;}
+  .pdf-loading{position:absolute; inset:0; z-index:2; display:flex; align-items:center; justify-content:center;
+    background:#e9e6df; color:var(--muted); font-family:Arial,sans-serif; font-size:.9rem; letter-spacing:.06em;}
+  .pdf-loading.hide{display:none;}
+  @media (max-width:760px){
+    .pdf-side{display:none;} .pdf-select{display:block;}
+    .pdf-box{width:100vw; height:100vh; border-radius:0;} .pdf-title{display:none;}
+  }
+
+  /* ---- Szubjektív értékelés ---- */
+  details.eval{margin-top:12px;}
+  details.eval summary{color:var(--accent);}
+  .eval-body{padding:4px 0 2px;}
+  .eval-body p{margin:10px 0; font-size:.98rem;}
+  .eval-body p strong{display:block; font-family:Arial,sans-serif; font-weight:normal; font-size:.7rem;
+    letter-spacing:.16em; text-transform:uppercase; color:var(--accent); margin-bottom:1px;}
+  .eval-body p.note{margin-top:14px;}
+
+  /* ---- Videók ---- */
+  .videos{display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:12px; margin:18px 0;}
+  .video-item{border:1px solid var(--line); border-radius:6px; overflow:hidden; background:#fff;}
+  .video-item video{width:100%; aspect-ratio:16/9; display:block; background:#dcd9d3;}
+  .video-item figcaption{font-family:Arial,sans-serif; font-size:.72rem; letter-spacing:.06em; color:var(--muted); padding:7px 10px;}
+
+  /* ---- Oldalsó lista (navigáció) ---- */
+  html{scroll-behavior:smooth;}
+  .brand, .card, .compare{scroll-margin-top:18px;}
+  .sidenav{
+    position:fixed; top:0; left:0; bottom:0; width:250px; overflow-y:auto; z-index:900;
+    background:#fff; border-right:1px solid var(--line); padding:22px 0 34px;
+    font-family:Arial,sans-serif;
+  }
+  .sn-title{font-size:.7rem; letter-spacing:.22em; text-transform:uppercase; color:var(--muted); padding:0 20px 8px;}
+  .sn-link{display:block; text-decoration:none; color:var(--ink); border-left:3px solid transparent;}
+  .sn-brand{padding:14px 20px 5px 17px; font-size:.72rem; letter-spacing:.18em; text-transform:uppercase; color:var(--accent); font-weight:bold;}
+  .sn-item{padding:5px 20px 5px 25px; font-size:.84rem; line-height:1.35;}
+  .sn-link:hover{background:var(--bg);}
+  .sn-link.active{background:var(--bg); border-left-color:var(--accent);}
+  .sn-item.active{font-weight:bold;}
+  .sn-extra{margin-top:10px; border-top:1px solid var(--line); padding-top:6px;}
+  .sn-toggle{
+    display:none; position:fixed; top:12px; left:12px; z-index:950; cursor:pointer;
+    background:var(--ink); color:#fff; border:0; border-radius:20px; padding:8px 16px;
+    font-family:Arial,sans-serif; font-size:.78rem; letter-spacing:.1em; text-transform:uppercase;
+    box-shadow:0 2px 10px rgba(0,0,0,.25);
+  }
+  .sn-backdrop{display:none; position:fixed; inset:0; background:rgba(20,18,15,.45); z-index:890;}
+  @media (min-width:1000px){ body{padding-left:250px;} }
+  @media (max-width:999px){
+    .sidenav{transform:translateX(-100%); transition:transform .25s; width:min(290px,85vw); box-shadow:0 0 30px rgba(0,0,0,.25);}
+    body.nav-open .sidenav{transform:none;}
+    body.nav-open .sn-backdrop{display:block;}
+    .sn-toggle{display:block;}
+    .sidenav{padding-top:62px;}
+    header{padding-top:72px;}
+  }
+  @media print{ .sidenav, .sn-toggle, .sn-backdrop{display:none !important;} body{padding-left:0 !important;} }
+</style>
+</head>
+<body>
+
+<button class="sn-toggle" id="sn-toggle" type="button" aria-controls="sidenav" aria-expanded="false">☰ Lista</button>
+<div class="sn-backdrop" id="sn-backdrop"></div>
+<nav class="sidenav" id="sidenav" aria-label="Szemüvegek listája"></nav>
+
+<header>
+  <h1>Szemüvegkatalógus</h1>
+  <p>Akoni, Jacques Marie Mage, Matsuda, Masunaga &amp; Ahlem — válogatott modellek</p>
+</header>
+
+<!-- ============ AKONI ============ -->
+<section class="brand" id="akoni">
+  <h2>Akoni</h2>
+
+  <!-- ARGO -->
+  <div class="card" id="argo" data-nav="Argo">
+    <div class="card-head">
+      <h3>Argo</h3>
+      <span class="badge">Optikai szemüveg</span>
+    </div>
+    <p class="variant">Szín: Havana — 12 karátos arany · Alternative Fit</p>
+    <p class="pdf-link"><a href="Akoni%C2%AE%20Argo%20-%20Designer%20Optical%20Glasses%20for%20Men%20and%20Women.pdf" target="_blank" rel="noopener" data-group="Akoni" data-title="Argo — Havana / 12k arany">📄 Termékoldal megnyitása (PDF)</a></p>
+    <div class="gallery">
+      <a href="ARGO_AKX_538B_55_1.jpg" target="_blank"><img src="ARGO_AKX_538B_55_1.jpg" alt="Akoni Argo – oldalnézet"></a>
+      <a href="ARGO_AKX_538B_55_2.jpg" target="_blank"><img src="ARGO_AKX_538B_55_2.jpg" alt="Akoni Argo – szemből"></a>
+      <a href="ARGO_AKX_538B_55_3.jpg" target="_blank"><img src="ARGO_AKX_538B_55_3.jpg" alt="Akoni Argo – szár"></a>
+      <a href="ARGO_AKX_538B_55_4.jpg" target="_blank"><img src="ARGO_AKX_538B_55_4.jpg" alt="Akoni Argo – részlet"></a>
+    </div>
+    <p class="desc">Az Argo — amely Iaszón és az argonauták legendás hajójáról kapta a nevét — a felfedezés, a merészség és a kalandvágy megtestesítője. A nagyvonalú arányok, a plasztikusan formázott fém orrnyereg és a recézett, teljes egészében fémből készült szárak a műszaki mesterségbeli tudást ötvözik a kifinomult megjelenéssel: olyan keret, amelyben a mérnöki precizitás találkozik a mitikus kalanddal.</p>
+    <details open>
+      <summary>Részletek</summary>
+      <table>
+        <tr><td>Megnevezés</td><td>Argo – Havana – 12k arany – víztiszta lencsék</td></tr>
+        <tr><td>Cikkszám (SKU)</td><td>AKX-538B-55-AF</td></tr>
+        <tr><td>Méret (mm)</td><td>55/17–145</td></tr>
+        <tr><td>Súly</td><td>30 g</td></tr>
+        <tr><td>Keret</td><td>Japán acetát</td></tr>
+        <tr><td>Szárak</td><td>Japán titán</td></tr>
+        <tr><td>Orrpárnák</td><td>Kerámia, béta-titán orrpárnakarokkal</td></tr>
+        <tr><td>Lencsék</td><td>Víztiszta lencsék</td></tr>
+        <tr><td>Származási hely</td><td>Japánban készült</td></tr>
+      </table>
+    </details>
+    <details class="eval">
+      <summary>Szubjektív értékelés</summary>
+      <div class="eval-body">
+        <p><strong>Összbenyomás</strong>Visszafogott, mégis karakteres pilótaforma: a sötét Havana acetát és az arany titán szárak együtt drágábbnak hatnak, mint amennyire feltűnőek. A válogatás egyik legkönnyebben hordható, legkevésbé kockázatos darabja.</p>
+        <p><strong>A keret jellemzése</strong>Lapos felső vonalú, szögletes-lekerekített navigátor vékony acetát fronttal és dupla hídszerkezettel. A mélyen mintázott Havana meleg hatású, az arany szárak és a finom szegecsek ékszerjelleget adnak neki. 30 g, ezért egész napos viselésre is jó.</p>
+        <p><strong>Milyen karakternek</strong>Higgadt, magabiztos karakternek, aki a komolyságot és a melegséget egyszerre szeretné — a „csendes elegancia” embere, akinek nem kell, hogy a keretet mindenki észrevegye.</p>
+        <p><strong>Milyen helyzetben</strong>Napi viselet, iroda, előadás, konferencia, üzleti ebéd; hétköznap és ünnepi alkalmon egyaránt megállja a helyét.</p>
+        <p><strong>Milyen megjelenéshez</strong>Zakóhoz, öltönyhöz, kötött pulóverhez, ingre; barna, bézs, sötétzöld és tengerészkék ruhatárhoz a legszebb. Arany vagy bronz színű óra mellé természetes választás.</p>
+        <p><strong>Amire érdemes figyelni</strong>A front viszonylag alacsony, ezért progresszív lencsénél érdemes az optikussal egyeztetni a hasznos lencsemagasságot; az Alternative Fit orrnyereg illesztését próbán kell ellenőrizni.</p>
+        <p class="note">Fotók és adatlap alapján írt, szubjektív vélemény — viselési tapasztalat nélkül.</p>
+      </div>
+    </details>
+  </div>
+
+  <!-- AGILE -->
+  <div class="card" id="agile" data-nav="Agile">
+    <div class="card-head">
+      <h3>Agile</h3>
+      <span class="badge">Optikai szemüveg</span>
+    </div>
+    <p class="variant">Szín: matt antikolt ezüst / matt kristálykék-szürke</p>
+    <p class="pdf-link"><a href="Akoni%C2%AE%20Agile%20-%20Designer%20Optical%20Glasses%20for%20Men%20and%20Women.pdf" target="_blank" rel="noopener" data-group="Akoni" data-title="Agile — antikolt ezüst / kristálykék-szürke">📄 Termékoldal megnyitása (PDF)</a></p>
+    <div class="gallery">
+      <a href="AGILE_AKX_416B_41_1.jpg" target="_blank"><img src="AGILE_AKX_416B_41_1.jpg" alt="Akoni Agile – oldalnézet"></a>
+      <a href="AGILE_AKX_416B_41_2.jpg" target="_blank"><img src="AGILE_AKX_416B_41_2.jpg" alt="Akoni Agile – szemből"></a>
+      <a href="AGILE_AKX_416B_41_3.jpg" target="_blank"><img src="AGILE_AKX_416B_41_3.jpg" alt="Akoni Agile – részlet"></a>
+    </div>
+    <p class="desc">A látványos, több rétegű szerkesztésmódjával kitűnő Agile — melyben a robusztus japán acetát karima elegánsan kontrasztos japán titán kerettel párosul — a klasszikus sziluettek friss, kortárs és letisztult alternatíváját kínálja az Akonitól, egyúttal jól tükrözve azt a gyors, agilis tervezői gondolkodást, amely a modell nevét is adta.</p>
+    <details open>
+      <summary>Részletek</summary>
+      <table>
+        <tr><td>Megnevezés</td><td>Agile – Matte Antiqued Silver – Matte Crystal Blue Grey</td></tr>
+        <tr><td>Cikkszám (SKU)</td><td>AKX-416B-41</td></tr>
+        <tr><td>Méret (mm)</td><td>41/26–140</td></tr>
+        <tr><td>Súly</td><td>25,5 g</td></tr>
+        <tr><td>Szárak</td><td>Egyedi titán szárvég, menetes csavarrendszer és japán acetát szárak · japán titán menetes csavarrendszerrel</td></tr>
+        <tr><td>Orrpárnák</td><td>Kerámia, béta-titán orrpárnakarokkal</td></tr>
+        <tr><td>Lencsék</td><td>Víztiszta lencsék</td></tr>
+        <tr><td>Származási hely</td><td>Japánban készült</td></tr>
+      </table>
+    </details>
+    <details class="eval">
+      <summary>Szubjektív értékelés</summary>
+      <div class="eval-body">
+        <p><strong>Összbenyomás</strong>A három optikai Akoni közül a legfinomabb és legmeglepőbb: a kristálykék-szürke acetát gyűrű és az antikolt ezüst titán együtt „archív laboratórium” hangulatot ad.</p>
+        <p><strong>A keret jellemzése</strong>Kicsi (41 mm), kerekített-szögletes, panto-szerű forma rétegelt szerkezettel: az acetát karika a titán keretben ül, a vékony szárak csavarral rögzített titán szárvéggel zárulnak. 25,5 g, nagyon könnyű.</p>
+        <p><strong>Milyen karakternek</strong>Intellektuális, megfontolt, a részletekre figyelő karakternek, aki a szemüvegben a műszaki és kézműves finomságot keresi, nem a hangos gesztust.</p>
+        <p><strong>Milyen helyzetben</strong>Akadémiai és kreatív környezet, előadás, könyvtár, kávézó, műhely; csendes, hétköznapi magabiztosság.</p>
+        <p><strong>Milyen megjelenéshez</strong>Hideg és semleges tónusú ruhatárhoz — szürke, tengerészkék, fekete, len; ezüst vagy acél színű óra mellé.</p>
+        <p><strong>Amire érdemes figyelni</strong>A 41 mm-es lencseszélesség kicsi: keskeny vagy kisebb arcon mutat a legjobban, nagyobb fejnél aránytalan lehet; erős vagy progresszív lencséhez a kis lencsefelület korlátot jelenthet. A kristályos szín szokatlan, ezért a ruhatárhoz is tudatosan kell választani.</p>
+        <p class="note">Fotók és adatlap alapján írt, szubjektív vélemény — viselési tapasztalat nélkül.</p>
+      </div>
+    </details>
+  </div>
+
+  <!-- SOLIS -->
+  <div class="card" id="solis" data-nav="Solis">
+    <div class="card-head">
+      <h3>Solis</h3>
+      <span class="badge sun">Napszemüveg</span>
+      <span class="price">482.000 Ft</span>
+    </div>
+    <p class="variant">Szín: Black Iron és bronz</p>
+    <p class="pdf-link"><a href="Akoni%C2%AE%20Solis%20-%20Designer%20Sunglasses%20for%20Men%20and%20Women.pdf" target="_blank" rel="noopener" data-group="Akoni" data-title="Solis — Black Iron / bronz">📄 Termékoldal megnyitása (PDF)</a></p>
+    <div class="gallery">
+      <a href="SOLIS_AKS_507E_51_1.jpg" target="_blank"><img src="SOLIS_AKS_507E_51_1.jpg" alt="Akoni Solis – oldalnézet"></a>
+      <a href="SOLIS_AKS_507E_51_2.jpg" target="_blank"><img src="SOLIS_AKS_507E_51_2.jpg" alt="Akoni Solis – szemből"></a>
+      <a href="SOLIS_AKS_507E_51_3.jpg" target="_blank"><img src="SOLIS_AKS_507E_51_3.jpg" alt="Akoni Solis – részlet"></a>
+    </div>
+    <p class="desc">A Solis az Akoni legújabb értelmezése a klasszikus navigátor sziluettről: japán acetát frontját japán titán keret egészíti ki, állítható szárakkal és átmenetes (degradé) lencsékkel.</p>
+    <details open>
+      <summary>Részletek</summary>
+      <table>
+        <tr><td>Megnevezés</td><td>Solis – Black Iron – bronz – Black Crystal / Senape – AR</td></tr>
+        <tr><td>Cikkszám (SKU)</td><td>AKS-507E-51</td></tr>
+        <tr><td>Méret (mm)</td><td>51/21–152</td></tr>
+        <tr><td>Súly</td><td>33,4 g</td></tr>
+        <tr><td>Szárak</td><td>Egyedi, állítható japán titán szárak, szárvégek és menetes csavarrendszer</td></tr>
+        <tr><td>Orrpárnák</td><td>Kerámia, béta-titán orrpárnakarokkal és fém bevonattal</td></tr>
+        <tr><td>Napfénylencsék</td><td>Black Crystal / Senape – 4 base, 2. kategória, CR-39 lencsék tükröződésmentes bevonattal</td></tr>
+        <tr><td>Származási hely</td><td>Japánban készült</td></tr>
+      </table>
+    </details>
+    <details class="eval">
+      <summary>Szubjektív értékelés</summary>
+      <div class="eval-body">
+        <p><strong>Összbenyomás</strong>A klasszikus navigátor egyik legszebb mai átirata: a fekete acetát front és a bronz titán kontrasztja, valamint a meleg borostyán (senape) lencse nagyon elegáns. Kevésbé közhelyes, mint a szürke vagy zöld lencsés társai.</p>
+        <p><strong>A keret jellemzése</strong>Dupla hidas, határozott vonalú, nagy navigátor; a front masszív, a titán keret és az állítható szárak mérnöki hatást keltenek. 33,4 g — érezhetően tömör, de kiegyensúlyozott.</p>
+        <p><strong>Milyen karakternek</strong>Magabiztos, határozott, de nem hivalkodó karakternek, aki szereti a klasszikus aviator-hagyományt, ám nem a megszokott márkákhoz nyúlna.</p>
+        <p><strong>Milyen helyzetben</strong>Városi nyár, autóvezetés, utazás, teraszos ebéd, hétvégi program. A 2. kategóriás lencse vezetéshez és általános napsütéshez jó; tenger, hó vagy magashegy esetén sötétebb lencsét érdemes választani.</p>
+        <p><strong>Milyen megjelenéshez</strong>Fehér vagy kék ing, vászon, bőrdzseki, sötét farmer; barna és bronz bőrtárgyak, rozsdamentes vagy bronz színű óra mellé.</p>
+        <p><strong>Amire érdemes figyelni</strong>A borostyán lencse melegebbre színezi a környezetet; a 152 mm-es szárhossz hosszabb a megszokottnál, ezért fejmérethez próbán ellenőrizendő. Az ára (482.000 Ft) a válogatás felső sávjába esik.</p>
+        <p class="note">Fotók és adatlap alapján írt, szubjektív vélemény — viselési tapasztalat nélkül.</p>
+      </div>
+    </details>
+    <p class="note">Minden szemüveghez teljes csomagolási szett jár: alumínium tok és bőr tasak.</p>
+  </div>
+
+  <!-- SPRINT-A WHITE GOLD -->
+  <div class="card" id="sprint-a-feherarany" data-nav="Sprint-A · fehérarany">
+    <div class="card-head">
+      <h3>Sprint-A</h3>
+      <span class="badge sun">Napszemüveg</span>
+      <span class="price">396.800 Ft</span>
+    </div>
+    <p class="variant">Szín: csiszolt fehérarany (Brushed White Gold) / matt fekete palládium</p>
+    <p class="pdf-link"><a href="Akoni%C2%AE%20Sprint-A%20-%20Designer%20Sunglasses%20for%20Men%20and%20Women_whitegold.pdf" target="_blank" rel="noopener" data-group="Akoni" data-title="Sprint-A — Brushed White Gold">📄 Termékoldal megnyitása (PDF)</a></p>
+    <div class="gallery">
+      <a href="SPRINT_AKS_504A_55-1_HD.jpg" target="_blank"><img src="SPRINT_AKS_504A_55-1_HD.jpg" alt="Akoni Sprint-A fehérarany – oldalnézet"></a>
+      <a href="SPRINT_AKS_504A_55-2_HD.jpg" target="_blank"><img src="SPRINT_AKS_504A_55-2_HD.jpg" alt="Akoni Sprint-A fehérarany – szemből"></a>
+      <a href="SPRINT_AKS_504A_55-3_HD.jpg" target="_blank"><img src="SPRINT_AKS_504A_55-3_HD.jpg" alt="Akoni Sprint-A fehérarany – részlet"></a>
+    </div>
+    <p class="desc">A vintage és modern elemeket ötvöző Sprint-A keret perforált oldalvédőkkel készül, amelyek a luxus sportautók belső tereit idézik. Az Akoni állítható szárrendszere tökéletes illeszkedést biztosít, és jól mutatja a márka elkötelezettségét a legújabb formatervezési és technológiai újítások iránt.</p>
+    <details open>
+      <summary>Részletek</summary>
+      <table>
+        <tr><td>Megnevezés</td><td>Sprint-A – Brushed White Gold / Matte Black Palladium</td></tr>
+        <tr><td>Cikkszám (SKU)</td><td>AKS-504A-55</td></tr>
+        <tr><td>Méret (mm)</td><td>55/16–152</td></tr>
+        <tr><td>Súly</td><td>32 g</td></tr>
+        <tr><td>Keret</td><td>Japán titán, egymásba illeszkedő titán oldalvédőkkel</td></tr>
+        <tr><td>Orrpárnák</td><td>Kerámia, béta-titán orrpárnakarokkal</td></tr>
+        <tr><td>Merevítők</td><td>Egyedi formájú, mintázatú és bevonatú merevítőbetét (wirecore)</td></tr>
+        <tr><td>Napfénylencsék</td><td>Sötét olíva – arany tükrös (Gold Flash Mirror) AR lencsék – 2 base – CR-39 – 2. kategória</td></tr>
+        <tr><td>Származási hely</td><td>Japánban készült</td></tr>
+      </table>
+    </details>
+    <details class="eval">
+      <summary>Szubjektív értékelés</summary>
+      <div class="eval-body">
+        <p><strong>Összbenyomás</strong>A válogatás leglátványosabb, „tárgyszerű” napszemüvege: a perforált oldalvédők, a szögletes front és az arany tükrös zöld lencse inkább műszaki ékszerre emlékeztet, mint hagyományos szemüvegre.</p>
+        <p><strong>A keret jellemzése</strong>Szögletes-téglalap forma dupla híddal, egymásba illeszkedő titán oldalvédőkkel és perforált mintával, amely sportautók belső tereit idézi. Fehérarany és matt fekete palládium felület, könnyű (32 g) szerkezet.</p>
+        <p><strong>Milyen karakternek</strong>Technikát, formatervezést és tárgykultúrát kedvelő, kollekcionáló karakternek, aki vállalja, hogy a szemüvege beszédtéma — de ezt tudatos, letisztult stílusban teszi.</p>
+        <p><strong>Milyen helyzetben</strong>Nyár, utazás, repülőtér, autó, nyaralás, városi séta, fesztivál; kevésbé való komoly üzleti környezetbe vagy hivatalos eseményre.</p>
+        <p><strong>Milyen megjelenéshez</strong>Egyszínű, letisztult ruha mellé a legjobb: fehér póló, len ing, sötét zakó; így a szemüveg a fókusz. Ezüst, acél vagy fehérarany színű óra természetes párja.</p>
+        <p><strong>Amire érdemes figyelni</strong>Az 55 mm-es szögletes front nagyobb arcot kíván; a tükrös, gradiens lencse és a perforált oldalvédő gondosabb tisztítást kér.</p>
+        <p class="note">Fotók és adatlap alapján írt, szubjektív vélemény — viselési tapasztalat nélkül.</p>
+      </div>
+    </details>
+  </div>
+
+  <!-- SPRINT-A BRUSHED GOLD (A1) -->
+  <div class="card" id="sprint-a-arany" data-nav="Sprint-A · arany (A1)">
+    <div class="card-head">
+      <h3>Sprint-A</h3>
+      <span class="badge sun">Napszemüveg</span>
+      <span class="badge soon">Hamarosan érkezik</span>
+      <span class="price">396.800 Ft</span>
+    </div>
+    <p class="variant">Szín: csiszolt arany (Brushed 12k Gold) / matt fekete</p>
+    <p class="pdf-link"><a href="Akoni%C2%AE%20Sprint-A1%20-%20Designer%20Sunglasses%20for%20Men%20and%20Women.pdf" target="_blank" rel="noopener" data-group="Akoni" data-title="Sprint-A — Brushed 12k Gold">📄 Termékoldal megnyitása (PDF)</a></p>
+    <div class="gallery">
+      <a href="SPRINT-A_AKS_504E_55_1.jpg" target="_blank"><img src="SPRINT-A_AKS_504E_55_1.jpg" alt="Akoni Sprint-A arany – oldalnézet"></a>
+      <a href="SPRINT-A_AKS_504E_55_2.jpg" target="_blank"><img src="SPRINT-A_AKS_504E_55_2.jpg" alt="Akoni Sprint-A arany – szemből"></a>
+      <a href="SPRINT-A_AKS_504E_55_3.jpg" target="_blank"><img src="SPRINT-A_AKS_504E_55_3.jpg" alt="Akoni Sprint-A arany – részlet"></a>
+    </div>
+    <p class="desc">A vintage és modern elemeket ötvöző Sprint-A keret perforált oldalvédőkkel készül, amelyek a luxus sportautók belső tereit idézik. Az Akoni állítható szárrendszere tökéletes illeszkedést biztosít, és jól mutatja a márka elkötelezettségét a legújabb formatervezési és technológiai újítások iránt.</p>
+    <details open>
+      <summary>Részletek</summary>
+      <table>
+        <tr><td>Megnevezés</td><td>Sprint-A – Brushed 12k Gold / Matte Black</td></tr>
+        <tr><td>Cikkszám (SKU)</td><td>AKS-504E-55</td></tr>
+        <tr><td>Méret (mm)</td><td>55/16–152</td></tr>
+        <tr><td>Súly</td><td>33,7 g</td></tr>
+        <tr><td>Keret</td><td>Japán titán, egymásba illeszkedő titán oldalvédőkkel</td></tr>
+        <tr><td>Szárak</td><td>Egyedi, állítható titán szárrendszer menetes csavarrendszerrel</td></tr>
+        <tr><td>Orrpárnák</td><td>Kerámia, béta-titán orrpárnakarokkal</td></tr>
+        <tr><td>Napfénylencsék</td><td>Sötétszürke lencsék – 2 base – CR-39, háromrétegű tükröződésmentes bevonattal</td></tr>
+        <tr><td>Származási hely</td><td>Japánban készült</td></tr>
+      </table>
+    </details>
+    <details class="eval">
+      <summary>Szubjektív értékelés</summary>
+      <div class="eval-body">
+        <p><strong>Összbenyomás</strong>Ugyanaz a markáns forma, de a meleg 12 karátos arany és a sötétszürke lencse sokkal visszafogottabb, klasszikusabb hatást ad — szerintem a három Sprint-A közül ez a legkönnyebben, a legtöbb helyzetben viselhető.</p>
+        <p><strong>A keret jellemzése</strong>Szögletes, dupla hidas front, perforált oldalvédők, állítható titán szárrendszer; 33,7 g, a fehérarany változatnál kicsit nehezebb. A sötétszürke lencse semleges színvisszaadást ad.</p>
+        <p><strong>Milyen karakternek</strong>Annak, aki a Sprint-A formáját szeretné, de a fehérarany tükrös zöld lencse túl látványos neki; meleg, klasszikus-luxus ízlésű, magabiztos karakter.</p>
+        <p><strong>Milyen helyzetben</strong>Mindennapos napszemüvegnek, vezetéshez, utazáshoz, városi nyárhoz és nyaraláshoz egyaránt; a semleges lencse miatt a színek természetesek maradnak.</p>
+        <p><strong>Milyen megjelenéshez</strong>Sötét zakó, fehér ing, bőrdzseki, lenvászon; arany színű óra és barna bőrtárgyak mellé; meleg bőrtónushoz különösen szép.</p>
+        <p><strong>Amire érdemes figyelni</strong>Hamarosan érkezik, ezért viselésben még nem láttam. A forma így is nagy (55 mm), nagyobb arcra való; a meleg arany nem mindenkinek áll jól hideg tónusú ruhatárhoz.</p>
+        <p class="note">Fotók és adatlap alapján írt, szubjektív vélemény — viselési tapasztalat nélkül.</p>
+      </div>
+    </details>
+  </div>
+
+  <!-- SPRINT-A 504C VARIANT -->
+  <div class="card" id="sprint-a-504c" data-nav="Sprint-A · 504C">
+    <div class="card-head">
+      <h3>Sprint-A</h3>
+      <span class="badge sun">Napszemüveg</span>
+    </div>
+    <p class="variant">További színváltozat — cikkszám: AKS-504C-55</p>
+    <p class="pdf-link"><a href="Akoni%C2%AE%20Sprint-A%20-%20Designer%20Sunglasses%20for%20Men%20and%20Women.pdf" target="_blank" rel="noopener" data-group="Akoni" data-title="Sprint-A — általános oldal">📄 Általános Sprint-A oldal (PDF) — nincs rajta cikkszám vagy ár</a></p>
+    <div class="gallery">
+      <a href="SPRINT_AKS_504C_55-1_HD.jpg" target="_blank"><img src="SPRINT_AKS_504C_55-1_HD.jpg" alt="Akoni Sprint-A 504C – oldalnézet"></a>
+      <a href="SPRINT_AKS_504C_55-2_HD.jpg" target="_blank"><img src="SPRINT_AKS_504C_55-2_HD.jpg" alt="Akoni Sprint-A 504C – szemből"></a>
+      <a href="SPRINT_AKS_504C_55-3_HD.jpg" target="_blank"><img src="SPRINT_AKS_504C_55-3_HD.jpg" alt="Akoni Sprint-A 504C – részlet"></a>
+    </div>
+    <p class="desc">A Sprint-A modell további színváltozata. A keret jellemzői megegyeznek a fenti Sprint-A modellekével: perforált titán oldalvédők, állítható szárrendszer, japán kézműves kivitel.</p>
+    <details class="eval">
+      <summary>Szubjektív értékelés</summary>
+      <div class="eval-body">
+        <p><strong>Összbenyomás</strong>A fotók alapján a Sprint-A „lopakodó” változata: sötét, matt gunmetal-hatású keret és barna lencse; kevésbé feltűnő, mint az arany vagy a fehérarany.</p>
+        <p><strong>A keret jellemzése</strong>Ugyanaz a szögletes, dupla hidas forma perforált oldalvédőkkel; a sötét felület mellett a barna lencse meleg kontrasztot ad.</p>
+        <p><strong>Milyen karakternek</strong>Technikai formát kedvelő, de a visszafogottabb, sötét hatást szerető karakternek.</p>
+        <p><strong>Milyen helyzetben</strong>Városi viselet, utazás, vezetés, hétköznapi napszemüvegként; üzletiesebb környezetben is kevésbé zavaró.</p>
+        <p><strong>Milyen megjelenéshez</strong>Sötét, monokróm ruhatár — fekete, antracit, tengerészkék; bőrdzseki, garbó.</p>
+        <p><strong>Amire érdemes figyelni</strong>Ehhez a színhez nincs adatlap, ezért az értékelés kizárólag a képekre épül; az anyagot, a lencsét és a súlyt még ellenőrizni kell.</p>
+        <p class="note">Fotók és adatlap alapján írt, szubjektív vélemény — viselési tapasztalat nélkül.</p>
+      </div>
+    </details>
+    <p class="note">Ehhez a színváltozathoz nem áll rendelkezésre részletes termékadatlap a mappában.</p>
+  </div>
+</section>
+
+<!-- ============ JACQUES MARIE MAGE ============ -->
+<section class="brand" id="jacques-marie-mage">
+  <h2>Jacques Marie Mage</h2>
+
+  <!-- DELAGE -->
+  <div class="card" id="delage-etna" data-nav="Delage — Etna">
+    <div class="card-head">
+      <h3>Delage — Etna</h3>
+      <span class="badge">Optikai szemüveg</span>
+      <span class="price">1.075 USD</span>
+    </div>
+    <p class="variant">Limitált széria: mindössze 100 darab · 3 színben elérhető</p>
+    <p class="pdf-link"><a href="DELAGE%20%E2%80%93%20Jacques%20Marie%20Mage.pdf" target="_blank" rel="noopener" data-group="Jacques Marie Mage" data-title="Delage — Etna">📄 Termékoldal megnyitása (PDF)</a></p>
+    <div class="gallery">
+      <a href="Delage_Etna_RX_Front_Cropped_5377x3585_wiut2u.jpg" target="_blank"><img src="Delage_Etna_RX_Front_Cropped_5377x3585_wiut2u.jpg" alt="JMM Delage – szemből"></a>
+      <a href="Delage_Etna_RX_3-4_Cropped_5377x3585_ogxeki.jpg" target="_blank"><img src="Delage_Etna_RX_3-4_Cropped_5377x3585_ogxeki.jpg" alt="JMM Delage – háromnegyed nézet"></a>
+      <a href="Delage_Etna_RX_Detail-1_Cropped_5377x3585_hpteg9-2.jpg" target="_blank"><img src="Delage_Etna_RX_Detail-1_Cropped_5377x3585_hpteg9-2.jpg" alt="JMM Delage – részlet 1"></a>
+      <a href="Delage_Etna_RX_Detail-2_Cropped_5377x3585_rgtsbs-2.jpg" target="_blank"><img src="Delage_Etna_RX_Detail-2_Cropped_5377x3585_rgtsbs-2.jpg" alt="JMM Delage – részlet 2"></a>
+      <a href="Delage_Etna_RX_Detail-3_Cropped_5377x3585_nuwvm4-2.jpg" target="_blank"><img src="Delage_Etna_RX_Detail-3_Cropped_5377x3585_nuwvm4-2.jpg" alt="JMM Delage – részlet 3"></a>
+    </div>
+    <p class="desc">Kerek, az ötvenes évek stílusát idéző, kombinált anyagú szemüveg: vaskos acetát lencseforma, markáns titán szemöldökhíd, a márka jellegzetes nyílhegy formájú monoblokk zsanérja, valamint finoman gravírozott szárak egyedi nyílhegymotívummal.</p>
+    <p class="desc">Az Art Deco lendületes vonalai és finom díszítései teljesednek ki ebben a modern nagyvárosi életre szánt szemüvegben — merész acetátkeret és karakteres titán szemöldökhíd, amely a magabiztos viselő visszafogott, régi világbeli eleganciájáról árulkodik.</p>
+    <details open>
+      <summary>Részletek</summary>
+      <table>
+        <tr><td>Méret</td><td>Medium · teljes szélesség: 140 mm · szárhossz: 145 mm · orrnyereg (DBL): 25 mm · lencse: 45/40 mm</td></tr>
+        <tr><td>Szárak</td><td>Sötétarany, gravírozott titán szárak acetát végekkel</td></tr>
+        <tr><td>Zsanér</td><td>Arany, feszítéssel rögzített, egyedi nyílhegy monoblokk zsanér</td></tr>
+        <tr><td>Keret</td><td>Havana cellulóz-acetát · 100% béta-titán, sötétarany, ezüst akcentusokkal</td></tr>
+        <tr><td>Orrpárna</td><td>Egyedi orrpárna logóval és finom gravírozással</td></tr>
+        <tr><td>Lencsék</td><td>Szuperkönnyű zöld CR-39, 2 base lencse, hátoldali tükröződésmentes kezeléssel</td></tr>
+      </table>
+    </details>
+    <details class="eval">
+      <summary>Szubjektív értékelés</summary>
+      <div class="eval-body">
+        <p><strong>Összbenyomás</strong>Kollekciós darab a szó legjobb értelmében: apró, kerek, de rendkívül gazdag részletekben — a fekete-Havana acetát gyűrű és az arany titán szemöldökhíd (brow bar) az Art Deco lendületét idézi.</p>
+        <p><strong>A keret jellemzése</strong>Kompakt kerek lencseforma (45/40 mm), vaskos acetát front, felette finoman gravírozott arany titán híd; a nyílhegy zsanér és a gravírozott szárak a márka kézjegyei. Limitált, 100 darabos széria.</p>
+        <p><strong>Milyen karakternek</strong>Régivilági eleganciát, kézművességet és tárgykultúrát értékelő, kifinomult karakternek, aki a szemüveget öltözék-ékszernek tekinti, és nem bánja, ha kérdeznek róla.</p>
+        <p><strong>Milyen helyzetben</strong>Galéria, színház, vacsora, könyvbemutató, kreatív iroda, esti program; egy jó öltönyhöz éppúgy illik, mint egy laza hétvégi kabáthoz.</p>
+        <p><strong>Milyen megjelenéshez</strong>Tweed, kordbársony, selyem nyakkendő, sötét kabát, háromrészes öltöny; arany színű óra, bőr kiegészítők; az ötvenes évek hangulatú ruhatárat szépen kiemeli.</p>
+        <p><strong>Amire érdemes figyelni</strong>A 45 mm-es lencseszélesség kompakt: kis- és közepes arcra való, nagyobb fejnél az Evans jobb választás. A gyűrű és a híd együtt vizuálisan erős, az ára magas (1.075 USD), a széria limitált.</p>
+        <p class="note">Fotók és adatlap alapján írt, szubjektív vélemény — viselési tapasztalat nélkül.</p>
+      </div>
+    </details>
+    <details>
+      <summary>Csomagolás</summary>
+      <table>
+        <tr><td>Tok</td><td>Olaszországban kézzel készített, kemény bőrtok</td></tr>
+        <tr><td>Kendő</td><td>Mikroszálas tisztítókendő / díszzsebkendő</td></tr>
+        <tr><td>Doboz</td><td>Keményfalú, selyemszövettel bevont csomagolás</td></tr>
+        <tr><td>Tanúsítvány</td><td>Fejléces tanúsítvány limitált szériás sorszámmal és a kézműves aláírásával</td></tr>
+      </table>
+    </details>
+    <details>
+      <summary>Ápolás</summary>
+      <table>
+        <tr><td>Tisztítás</td><td>Naponta tisztítsa alkoholmentes lencsetisztító spray-vel és a mellékelt mikroszálas kendővel. Kerülje a vizet és a szappant, mert ezek a merevítőbetét és a zsanérok oxidációját okozhatják.</td></tr>
+        <tr><td>Tárolás</td><td>Óvja a szemüveget a szélsőséges hőtől a deformálódás elkerülése érdekében, és mindig a mellékelt JMM-tokban tárolja.</td></tr>
+      </table>
+    </details>
+  </div>
+
+  <!-- EVANS -->
+  <div class="card" id="evans-aegen" data-nav="Evans — Aegen">
+    <div class="card-head">
+      <h3>Evans — Aegen</h3>
+      <span class="badge">Optikai szemüveg</span>
+      <span class="price">940 EUR</span>
+    </div>
+    <p class="variant">Limitált széria: mindössze 400 darab · 3 színben elérhető · Wide illesztés</p>
+    <p class="pdf-link"><a href="EVANS%20RX%20%E2%80%93%20Jacques%20Marie%20Mage.pdf" target="_blank" rel="noopener" data-group="Jacques Marie Mage" data-title="Evans — Aegen">📄 Termékoldal megnyitása (PDF)</a></p>
+    <div class="gallery">
+      <a href="Evans_Aegen_Front_Cropped_5377x3585_exyuhg_yevg1w.jpg.webp" target="_blank"><img src="Evans_Aegen_Front_Cropped_5377x3585_exyuhg_yevg1w.jpg.webp" alt="JMM Evans – szemből"></a>
+      <a href="Evans_Aegen_Detail-1_Cropped_5377x3585_sixril_rbg419.webp" target="_blank"><img src="Evans_Aegen_Detail-1_Cropped_5377x3585_sixril_rbg419.webp" alt="JMM Evans – részlet 1"></a>
+      <a href="Evans_Aegen_Detail-2_Cropped_5377x3585_b4mts1_cj1f50.webp" target="_blank"><img src="Evans_Aegen_Detail-2_Cropped_5377x3585_b4mts1_cj1f50.webp" alt="JMM Evans – részlet 2"></a>
+      <a href="Evans_Aegen_Detail-3_Cropped_5377x3585_icgfbl_rgblmb.webp" target="_blank"><img src="Evans_Aegen_Detail-3_Cropped_5377x3585_icgfbl_rgblmb.webp" alt="JMM Evans – részlet 3"></a>
+    </div>
+    <p class="desc">A hatvanas évek stílusát idéző új darab az Optical Series-ben, jellegzetes dupla orrnyereg-híddal — nagyobb fejmérethez is kiválóan illeszkedik.</p>
+    <p class="desc">Aki a város koronázatlan királyaként érzi jól magát, az a megfelelő lelkiállapotban túllép a megszokott konvenciókon, és új korszakot nyit a művészi — nem csupán kereskedelmi — tárgyak számára. Mit is mondhatnék? Ha igazad van, igazad van. És neked igazad van.</p>
+    <details open>
+      <summary>Részletek</summary>
+      <table>
+        <tr><td>Méret</td><td>Wide · teljes szélesség: 145 mm · szárhossz: 146 mm · orrnyereg (DBL): 17 mm · lencse: 55/42 mm</td></tr>
+        <tr><td>Front</td><td>Jellegzetes nyílhegy formájú front pin, világosarany bevonattal</td></tr>
+        <tr><td>Merevítők</td><td>Látható, klasszikus merevítőbetétek (wirecore), világosarany bevonattal</td></tr>
+        <tr><td>Zsanér</td><td>Egyedi, 5 hordós zsanér finom hajszálvonalas részletekkel, ezüst palládium bevonattal</td></tr>
+        <tr><td>Szegecsek</td><td>Sarkantyú formájú szegecsek, ezüst palládium bevonattal</td></tr>
+        <tr><td>Jelölés</td><td>Belső száron fólianyomott ezüst márkajelzés</td></tr>
+        <tr><td>Keret</td><td>10 mm-es kikeményített cellulóz-acetát, fényezett Havana színben</td></tr>
+        <tr><td>Szárak</td><td>Egyedi, kétrétegű laminált szárak Havana külső és belső réteggel</td></tr>
+        <tr><td>Lencsék</td><td>Armorlite 4-base lencsék Superlight Bronze színben, hátoldali tükröződésmentes kezeléssel</td></tr>
+        <tr><td>Gyártói ár</td><td>940 EUR</td></tr>
+      </table>
+    </details>
+    <details class="eval">
+      <summary>Szubjektív értékelés</summary>
+      <div class="eval-body">
+        <p><strong>Összbenyomás</strong>A válogatás legnagyobb, legerőteljesebb optikai kerete, de ebben a változatban sokkal visszafogottabb, mint a cián lencsés: a fényezett Havana, a dupla híd és a hatvanas évekbeli navigátor-vonal így inkább elegáns, mint harsány.</p>
+        <p><strong>A keret jellemzése</strong>Nagy, Wide illesztésű navigátor (55/42 mm, 17 mm-es dupla híd) 10 mm-es acetáton, kétrétegű laminált Havana szárakkal; a front sarkain világosarany nyílhegy csapok, a száron világosarany wirecore, a zsanér és a szegecsek viszont ezüst palládium — a fotókon a meleg és a hideg fém finom kontrasztot ad.</p>
+        <p><strong>Milyen karakternek</strong>Magabiztos, markáns jelenlétű karakternek és nagyobb fejméretnek; erős vonású arcon érvényesül igazán.</p>
+        <p><strong>Milyen helyzetben</strong>Kreatív iparág, előadás, tárgyalás, esti program, galériamegnyitó, utcai viselet; a bronz lencse és a Havana miatt hivatalosabb környezetben is elfogadható.</p>
+        <p><strong>Milyen megjelenéshez</strong>Sötét, egyszínű ruhák (fekete garbó, bőrdzseki, antracit kabát), barna bőr kiegészítők, tweed vagy kordbársony; a Havana mintázat a meleg tónusokkal harmonizál.</p>
+        <p><strong>Amire érdemes figyelni</strong>Nagy és tömör, kis arcon elnyelheti az arcot. A fotókon halvány, szinte átlátszó bemutató lencse látszik, az adatlap Superlight Bronze lencsét ír, ezért a tényleges színhatást érdemes az optikusnál megnézni. Ára 940 EUR, a széria limitált (400 db).</p>
+        <p class="note">Fotók és adatlap alapján írt, szubjektív vélemény — viselési tapasztalat nélkül.</p>
+      </div>
+    </details>
+    <details>
+      <summary>Csomagolás</summary>
+      <table>
+        <tr><td>Tok</td><td>Olaszországban kézzel készített bőrtok</td></tr>
+        <tr><td>Kendő</td><td>Mikroszálas tisztítókendő / díszzsebkendő</td></tr>
+        <tr><td>Doboz</td><td>Keményfalú, selyemszövettel bevont csomagolás</td></tr>
+        <tr><td>Tanúsítvány</td><td>Fejléces tanúsítvány limitált szériás sorszámmal és a kézműves aláírásával</td></tr>
+      </table>
+    </details>
+    <details>
+      <summary>Ápolás</summary>
+      <table>
+        <tr><td>Tisztítás</td><td>Naponta tisztítsa alkoholmentes lencsetisztító spray-vel és a mellékelt mikroszálas kendővel. Kerülje a vizet és a szappant, mert ezek a merevítőbetét és a zsanérok oxidációját okozhatják.</td></tr>
+        <tr><td>Tárolás</td><td>Óvja a szemüveget a szélsőséges hőtől a deformálódás elkerülése érdekében, és mindig a mellékelt JMM-tokban tárolja.</td></tr>
+      </table>
+    </details>
+  </div>
+
+  <!-- EIKO -->
+  <div class="card" id="jmm-eiko-agar" data-nav="Eiko — Agar">
+    <div class="card-head">
+      <h3>Eiko — Agar</h3>
+      <span class="badge">Optikai szemüveg</span>
+      <span class="price">940 EUR</span>
+    </div>
+    <p class="variant">Limitált széria: mindössze 450 darab · 3 színben elérhető · Low Bridge illesztés kisebb méretekhez</p>
+    <p class="pdf-link"><a href="EIKO%20RX%20%E2%80%93%20Jacques%20Marie%20Mage.pdf" target="_blank" rel="noopener" data-group="Jacques Marie Mage" data-title="Eiko — Agar">📄 Termékoldal megnyitása (PDF)</a></p>
+    <div class="gallery">
+      <a href="Eiko_Agar_RX_Front_Cropped_5377x3585_vpcbgk.jpg.webp" target="_blank"><img src="Eiko_Agar_RX_Front_Cropped_5377x3585_vpcbgk.jpg.webp" alt="JMM Eiko – szemből, összecsukva"></a>
+      <a href="Eiko_Agar_RX_Detail-1_Cropped_5377x3585_lke1em.webp" target="_blank"><img src="Eiko_Agar_RX_Detail-1_Cropped_5377x3585_lke1em.webp" alt="JMM Eiko – részlet 1 (front, nyílhegy csapok)"></a>
+      <a href="Eiko_Agar_RX_Detail-2_Cropped_5377x3585_buxvqs.webp" target="_blank"><img src="Eiko_Agar_RX_Detail-2_Cropped_5377x3585_buxvqs.webp" alt="JMM Eiko – részlet 2 (arany wirecore a száron)"></a>
+      <a href="Eiko_Agar_RX_Detail-3_Cropped_5377x3585_ymqkzx.webp" target="_blank"><img src="Eiko_Agar_RX_Detail-3_Cropped_5377x3585_ymqkzx.webp" alt="JMM Eiko – részlet 3 (szár, háromnegyed nézet)"></a>
+    </div>
+    <p class="desc">Limitált kiadású, panto formájú szemüveg alacsony híddal (Low Bridge) a kisebb méretekhez, szélesebb orrpárnákkal, egyedi 7 hengeres zsanérral és „Classic” wirecore-ral, finom hajszálvonalas részletekkel.</p>
+    <p class="desc">A csendes folytonosság emblémája: olyan kifinomult egyszerűség, amely inkább suttog, mint kiabál. Kompakt panto sziluettje és az átgondolt alacsony híd az időtlen báj filozófiáját tükrözi — ahol a visszafogottság maga a gazdagság, a finomság pedig olyan erő, amely sosem fakul.</p>
+    <details open>
+      <summary>Részletek</summary>
+      <table>
+        <tr><td>Méret</td><td>Medium · teljes szélesség: 141 mm · szárhossz: 141 mm · orrnyereg (DBL): 22 mm · lencse: 47/38 mm</td></tr>
+        <tr><td>Keret</td><td>10 mm-es edzett cellulóz-acetát Havana színben; a szárak külseje áttetsző bézs, belseje Havana</td></tr>
+        <tr><td>Front csapok</td><td>Jellegzetes nyílhegy alakú csapok, 18 karátos arany</td></tr>
+        <tr><td>Wirecore</td><td>Szabadon látszó „Classic” wirecore, sötétarany bevonattal</td></tr>
+        <tr><td>Zsanér</td><td>Egyedi 7 hengeres zsanér finom hajszálvonalas részletekkel, sötétarany bevonattal</td></tr>
+        <tr><td>Szegecsek</td><td>Sarkantyú alakú szegecsek, 10 karátos arany bevonattal</td></tr>
+        <tr><td>Belső jelzés</td><td>Aranyfóliával nyomott hallmark a szár belsején</td></tr>
+        <tr><td>Orrpárna</td><td>Szélesebb orrpárnák (Low Bridge illesztés)</td></tr>
+        <tr><td>Lencsék</td><td>Armorlite 4 base lencse, Superlight Bronze színben, hátoldali tükröződésmentes kezeléssel</td></tr>
+        <tr><td>Gyártói ár</td><td>940 EUR</td></tr>
+      </table>
+    </details>
+    <details class="eval">
+      <summary>Szubjektív értékelés</summary>
+      <div class="eval-body">
+        <p><strong>Összbenyomás</strong>A válogatás legcsendesebb JMM-je: nincs rajta feltűnő ékszerelem, a sötét Havana panto és az apró arany részletek (a front sarkain a nyílhegy csapok, a száron a rovátkolt wirecore) együtt klasszikus, régimódi eleganciát adnak.</p>
+        <p><strong>A keret jellemzése</strong>Kompakt, kerek panto forma (47/38 mm lencse, 22 mm híd) vaskos, 10 mm-es acetáton, alacsony híddal és szélesebb orrpárnákkal a kisebb arcokhoz; a Havana front sötét, a szárak áttetsző bézs külsővel és Havana belsővel a fotókon melegebb tónust mutatnak.</p>
+        <p><strong>Milyen karakternek</strong>Visszafogott, tárgykultúrát és hagyományt szerető, magabiztos karakternek, aki a szemüvegen keresztül inkább hangulatot ad, mint hangot; kisebb vagy közepes arcra.</p>
+        <p><strong>Milyen helyzetben</strong>Egyetem, könyvtár, kutatás, előadás, kreatív iroda, kávéház, hétköznapi viselet; egy zakóval hivatalosabb alkalmakra is megfelel.</p>
+        <p><strong>Milyen megjelenéshez</strong>Tweed, len, kordbársony, kardigán, fehér ing; barna bőr kiegészítők, arany vagy sárgaacél óra; természetes, meleg tónusok.</p>
+        <p><strong>Amire érdemes figyelni</strong>A 47 mm-es lencse és a 141 mm-es szár kisebb méretű: nagyobb fejre az Evans (55 mm) jobb választás, és kisebb fejre szánták az alacsony hidat is. A Delage-hoz képest kevésbé látványos, a limitált széria (450 db) ára 940 EUR. A vaskos acetát miatt erősebb dioptriánál a lencse széle vastagodhat.</p>
+        <p class="note">Fotók és adatlap alapján írt, szubjektív vélemény — viselési tapasztalat nélkül.</p>
+      </div>
+    </details>
+    <details>
+      <summary>Csomagolás</summary>
+      <table>
+        <tr><td>Tok</td><td>Olaszországban kézzel készített, kemény bőrtok</td></tr>
+        <tr><td>Kendő</td><td>Mikroszálas tisztítókendő / díszzsebkendő</td></tr>
+        <tr><td>Doboz</td><td>Keményfalú, selyemszövettel bevont csomagolás</td></tr>
+        <tr><td>Tanúsítvány</td><td>Fejléces tanúsítvány limitált szériás sorszámmal és a kézműves aláírásával</td></tr>
+      </table>
+    </details>
+    <p class="note">Az adatok a mappában lévő JMM-termékoldalból (PDF) származnak; a méretek az oldalon így szerepelnek (a szárhossz is 141 mm). Az oldal ápolási fülének tartalma nem került a mentett PDF-be.</p>
+  </div>
+</section>
+
+<!-- ============ MATSUDA ============ -->
+<section class="brand" id="matsuda">
+  <h2>Matsuda</h2>
+
+  <!-- 10103H -->
+  <div class="card" id="matsuda-10103h" data-nav="10103H">
+    <div class="card-head">
+      <h3>10103H</h3>
+      <span class="badge">Optikai szemüveg</span>
+      <span class="price">282.900 Ft</span>
+    </div>
+    <p class="variant">Szín: Palladium White / Matte Black (PW-MBK) · Heritage kollekció · Eredeti megjelenés: 1995</p>
+    <p class="pdf-link"><a href="10103H%20Round%20Eyeglasses%20%7C%20Official%20Site%20%E2%80%93%20Matsuda.pdf" target="_blank" rel="noopener" data-group="Matsuda" data-title="10103H">📄 Termékoldal megnyitása (PDF)</a></p>
+    <div class="gallery">
+      <a href="matsuda-eyewear-10103h-pw-mbk-41-front.png.webp" target="_blank"><img src="matsuda-eyewear-10103h-pw-mbk-41-front.png.webp" alt="Matsuda 10103H – szemből"></a>
+      <a href="matsuda-eyewear-10103h-pw-mbk-41-profile.jpg.webp" target="_blank"><img src="matsuda-eyewear-10103h-pw-mbk-41-profile.jpg.webp" alt="Matsuda 10103H – oldalnézet"></a>
+    </div>
+    <p class="desc">A 10103H a XIX. század végének népszerű pince-nez szemüvegeiből merít ihletet: kerek lencseformája van, a peremhuzalon és a száron pedig a márka jellegzetes M+N gravírozása fut végig.</p>
+    <p class="desc">A késő 1800-as évek pince-nez formatervének modern értelmezése — könnyű titán szerkezet, kézzel felvitt lakk és aprólékos részletek egyesülnek ebben az időtlen, Japánban kézzel készített keretben.</p>
+    <details open>
+      <summary>Részletek</summary>
+      <table>
+        <tr><td>Modell</td><td>10103H</td></tr>
+        <tr><td>Kollekció</td><td>Heritage (optikai) · eredeti megjelenés: 1995</td></tr>
+        <tr><td>Szín</td><td>Palladium White – Matte Black (színkód: PW-MBK)</td></tr>
+        <tr><td>Méret (mm)</td><td>41/27–145</td></tr>
+        <tr><td>Illesztés</td><td>Narrow (keskeny)</td></tr>
+        <tr><td>Lencse</td><td>Víztiszta (Clear)</td></tr>
+        <tr><td>Keret</td><td>Könnyű titán szerkezet, kerek lencseforma</td></tr>
+        <tr><td>Díszítés</td><td>Jellegzetes M+N gravírozás a peremhuzalon és a száron</td></tr>
+        <tr><td>Felület</td><td>Kézzel felvitt lakk</td></tr>
+        <tr><td>Más méret</td><td>44 mm-es lencseszélességben is készül</td></tr>
+        <tr><td>Más színváltozatok</td><td>Brushed Gold – Matte Black · Brushed Black · Antique Gold · Antique Silver</td></tr>
+        <tr><td>Tartozékok</td><td>Matsuda kemény tok és mikroszálas tisztítókendő</td></tr>
+        <tr><td>Gyártói ár (USA)</td><td>625 USD</td></tr>
+        <tr><td>Származási hely</td><td>Japánban készült</td></tr>
+      </table>
+    </details>
+    <details class="eval">
+      <summary>Szubjektív értékelés</summary>
+      <div class="eval-body">
+        <p><strong>Összbenyomás</strong>A kerek fémkeret archetípusa kivételes kidolgozással: egyszerű, mégis tele finom részlettel — a száron végigfutó M+N gravírozás és a pince-nez ihletésű orrnyereg a Matsuda lényege.</p>
+        <p><strong>A keret jellemzése</strong>Kicsi (41 mm), tökéletesen kerek, vékony titán keret kézzel felvitt lakkal; a palládiumfehér és a matt fekete párosítás hűvös, grafikus. 1995 óta kínált Heritage darab, vagyis időtálló.</p>
+        <p><strong>Milyen karakternek</strong>Megfontolt, művészi, intellektuális karakternek, aki a visszafogott kifinomultságot és a hagyományt értékeli; keskeny, kisebb arcra különösen jó.</p>
+        <p><strong>Milyen helyzetben</strong>Egyetem, könyvtár, kávézó, kreatív környezet, hétköznapi viselet; egy jó zakóval hivatalos alkalmakra is megfelel.</p>
+        <p><strong>Milyen megjelenéshez</strong>Len, kardigán, kordbársony, fehér ing és zakó; ezüst, acél vagy palládium színű óra; fekete-fehér-szürke, természetes tónusok.</p>
+        <p><strong>Amire érdemes figyelni</strong>41 mm-en a lencsefelület kicsi: erős dioptriánál vagy progresszív lencséhez korlátozott lehet, nagyobb arcon pedig túl kicsinek hat; Narrow illesztésű, tehát keskenyebb fejre való.</p>
+        <p class="note">Fotók és adatlap alapján írt, szubjektív vélemény — viselési tapasztalat nélkül.</p>
+      </div>
+    </details>
+    <p class="note">A méret-, szín- és ár adatok a gyártó (matsuda.com) termékoldaláról származnak, 2026. október 3-i lekérdezéssel; a forint ár a mentett magyar oldalról való.</p>
+    <p class="note">Minden Matsuda keret kézzel készül a japán Sabae neves szemüvegműhelyeiben — akár két évet és 250 munkafázist is igényelhet egy-egy darab elkészítése, 50 év kísérletezésére és kreatív felfedezésére építve.</p>
+  </div>
+
+  <!-- M2062 -->
+  <div class="card" id="matsuda-m2062" data-nav="M2062">
+    <div class="card-head">
+      <h3>M2062</h3>
+      <span class="badge">Optikai szemüveg</span>
+      <span class="badge new">Új megjelenés</span>
+      <span class="price">328.200 Ft</span>
+    </div>
+    <p class="variant">Szín: Matte Black / Brushed Gold (MBK-BG) · Essential kollekció</p>
+    <p class="pdf-link"><a href="M2062%20Aviator%20Eyeglasses%20%7C%20Official%20Site%20%E2%80%93%20Matsuda.pdf" target="_blank" rel="noopener" data-group="Matsuda" data-title="M2062">📄 Termékoldal megnyitása (PDF)</a></p>
+    <div class="gallery">
+      <a href="58cf565e01d104b5b872ce388816a1fe.jpg.webp" target="_blank"><img src="58cf565e01d104b5b872ce388816a1fe.jpg.webp" alt="Matsuda M2062 – szemből"></a>
+      <a href="matsuda-eyewear-m2062-mbk-bg-56-pedestal.jpg.webp" target="_blank"><img src="matsuda-eyewear-m2062-mbk-bg-56-pedestal.jpg.webp" alt="Matsuda M2062 – háromnegyed nézet"></a>
+      <a href="matsuda-eyewear-m2062-mbk-bg-56-profile.jpg.webp" target="_blank"><img src="matsuda-eyewear-m2062-mbk-bg-56-profile.jpg.webp" alt="Matsuda M2062 – oldalnézet"></a>
+    </div>
+    <p class="desc">Az M2062 egy nagy méretű, módosított navigátor forma érlelt japán acetátból és titánból. A frontot a kontrasztos, megemelt karima emeli ki, a titán szárakat pedig kézzel lakkozott, gótikus ihletésű díszítés ékesíti.</p>
+    <details open>
+      <summary>Részletek</summary>
+      <table>
+        <tr><td>Modell</td><td>M2062</td></tr>
+        <tr><td>Kollekció</td><td>Essential (optikai)</td></tr>
+        <tr><td>Szín</td><td>Matte Black – Brushed Gold (színkód: MBK-BG)</td></tr>
+        <tr><td>Méret (mm)</td><td>56/15–145</td></tr>
+        <tr><td>Illesztés</td><td>Narrow (keskeny)</td></tr>
+        <tr><td>Lencse</td><td>Víztiszta (Clear)</td></tr>
+        <tr><td>Keret</td><td>Japán acetát (érlelt), megemelt kontrasztos karimával — módosított navigátor forma</td></tr>
+        <tr><td>Szárak</td><td>Gravírozott titán, kézzel lakkozott gótikus ihletésű díszítéssel</td></tr>
+        <tr><td>Szárvégek</td><td>Japán acetát</td></tr>
+        <tr><td>Más színváltozatok</td><td>Matte Grey Stone – Matte Black · Matte Navy – Antique Silver · Taupe – Antique Gold · Crystal – Antique Silver</td></tr>
+        <tr><td>Tartozékok</td><td>Matsuda kemény tok és mikroszálas tisztítókendő</td></tr>
+        <tr><td>Gyártói ár (USA)</td><td>725 USD</td></tr>
+        <tr><td>Származási hely</td><td>Japánban készült</td></tr>
+      </table>
+    </details>
+    <details class="eval">
+      <summary>Szubjektív értékelés</summary>
+      <div class="eval-body">
+        <p><strong>Összbenyomás</strong>Nagy, erőteljes navigátor, amelyet a matt fekete acetát és az arany titán szárak különleges, kissé gótikus eleganciává szelídítenek; szerintem a Matsuda-válogatás legmagabiztosabb, legférfiasabb darabja.</p>
+        <p><strong>A keret jellemzése</strong>56 mm-es nagy lencse, dupla híd, kontrasztos megemelt karima; a titán szárakon kézzel lakkozott, gótikus ihletésű gravírozás, acetát szárvégek. Vaskos hatású, mégis fegyelmezett.</p>
+        <p><strong>Milyen karakternek</strong>Határozott, vezető típusú, erős vonású karakternek és nagyobb arcnak; aki szeret megjelenni, de ízlésesen.</p>
+        <p><strong>Milyen helyzetben</strong>Üzleti környezet, tárgyalás, előadás, vezetői szerep, de a kreatív iparágban is jó.</p>
+        <p><strong>Milyen megjelenéshez</strong>Sötét öltöny, fekete garbó, bőrkabát, sötét monokróm ruhatár; arany részletekkel (óraszíj, kézelőgomb) összhangban.</p>
+        <p><strong>Amire érdemes figyelni</strong>Az 56 mm-es lencse nagy, de a 15 mm-es híd és a Narrow illesztés keskeny orrnyereget céloz — a kombináció szokatlan, ezért próbán ellenőrizendő. Az amerikai oldalon elfogyott.</p>
+        <p class="note">Fotók és adatlap alapján írt, szubjektív vélemény — viselési tapasztalat nélkül.</p>
+      </div>
+    </details>
+    <p class="note">A méret-, szín- és ár adatok a gyártó (matsuda.com) termékoldaláról származnak, 2026. október 3-i lekérdezéssel; a forint ár a mentett magyar oldalról való. Az amerikai oldalon valamennyi változat elfogyottként szerepel.</p>
+  </div>
+
+  <!-- M3129 ANTIQUE GOLD -->
+  <div class="card" id="m3129-antique-gold" data-nav="M3129 · Antique Gold">
+    <div class="card-head">
+      <h3>M3129</h3>
+      <span class="badge">Optikai szemüveg</span>
+      <span class="badge new">Új megjelenés</span>
+      <span class="badge out">Elfogyott</span>
+    </div>
+    <p class="variant">Essential kollekció · Szín: Antique Gold (antik arany) · Színkód: AG</p>
+    <p class="pdf-link"><a href="M3129%20Rectangular%20Eyeglasses%20%7C%20Official%20Site%20%E2%80%93%20Matsuda.pdf" target="_blank" rel="noopener" data-group="Matsuda" data-title="M3129">📄 Termékoldal megnyitása (PDF)</a></p>
+    <div class="gallery">
+      <a href="matsuda-eyewear-m3129-ag-51-front.jpg.webp" target="_blank"><img src="matsuda-eyewear-m3129-ag-51-front.jpg.webp" alt="Matsuda M3129 antik arany – szemből"></a>
+      <a href="matsuda-eyewear-m3129-ag-51-profile.jpg.webp" target="_blank"><img src="matsuda-eyewear-m3129-ag-51-profile.jpg.webp" alt="Matsuda M3129 antik arany – oldalnézet"></a>
+    </div>
+    <p class="desc">Az M3129 egy igazi statement darab, amelyet Párizs gótikus építészete ihletett. Karcsú titán keretét nemesfém felületkezelés, szárait élénk, „vitrázs" (stained glass) lakkozás díszíti — időtlen eleganciát sugároz. Egész napos viselésre is kényelmes, ideális a divatra fogékony, művészi stílusérzékkel rendelkező viselőknek.</p>
+    <details open>
+      <summary>Részletek</summary>
+      <table>
+        <tr><td>Modell</td><td>M3129</td></tr>
+        <tr><td>Kollekció</td><td>Essential (optikai)</td></tr>
+        <tr><td>Színkód</td><td>AG</td></tr>
+        <tr><td>Keret színe</td><td>Antique Gold</td></tr>
+        <tr><td>Lencse</td><td>Víztiszta (Clear)</td></tr>
+        <tr><td>Méret (mm)</td><td>51/19–145</td></tr>
+        <tr><td>Illesztés</td><td>Standard</td></tr>
+        <tr><td>Keret</td><td>Könnyű titán szerkezet, pince-nez kialakítás</td></tr>
+        <tr><td>Felület</td><td>Nemesfém hatású felületkezelés, „stained glass" lakk a száron</td></tr>
+        <tr><td>Származási hely</td><td>Japánban készült</td></tr>
+        <tr><td>Más színváltozatok</td><td>Palladium White · Brushed Gold · Matte Black (mindegyik 51/19–145)</td></tr>
+        <tr><td>Tartozékok</td><td>Matsuda kemény tok és mikroszálas tisztítókendő</td></tr>
+        <tr><td>Gyártói ár (USA)</td><td>725 USD</td></tr>
+        <tr><td>Elérhetőség</td><td>Elfogyott — a gyártó oldalán értesítés kérhető</td></tr>
+      </table>
+    </details>
+    <details class="eval">
+      <summary>Szubjektív értékelés</summary>
+      <div class="eval-body">
+        <p><strong>Összbenyomás</strong>A válogatás legművészibb darabja: a párizsi gótikus építészetből ihletett pince-nez szerkezet, a patinás Antique Gold fém és a finom gravírozás miatt inkább viselhető műtárgy, mint hagyományos szemüveg.</p>
+        <p><strong>A keret jellemzése</strong>Szögletes, trapéz-szerű front (51/19–145 mm) standard illesztéssel, vékony titánból; a dupla réteg adja a pince-nez hatást, a száron „stained glass” lakk, a felületen nemesfém hatás.</p>
+        <p><strong>Milyen karakternek</strong>Művészi, kreatív, a részletekre érzékeny karakternek, akit megfog egy tárgy története; kollekcionálónak, aki a ritkaságot is értékeli.</p>
+        <p><strong>Milyen helyzetben</strong>Galéria, műterem, színház, előadás, elegáns esti program; vékony, könnyű szerkezete miatt egész napos viselésre is alkalmas.</p>
+        <p><strong>Milyen megjelenéshez</strong>Sötét, vintage ihletésű ruhatár — bársony, tweed, sötét zakó, selyem; arany színű óra, gyűrű, bőr kiegészítők.</p>
+        <p><strong>Amire érdemes figyelni</strong>Elfogyott, ezért nehéz beszerezni. A vékony fémszerkezet és a pince-nez kialakítás gondosabb kezelést és jó optikust kíván az állításhoz.</p>
+        <p class="note">Fotók és adatlap alapján írt, szubjektív vélemény — viselési tapasztalat nélkül.</p>
+      </div>
+    </details>
+    <p class="note">A magyar oldalon nem szerepelt ár, mert a modell elfogyott; az USD ár és a további színek a gyártó (matsuda.com) oldaláról származnak, 2026. október 3-i lekérdezéssel.</p>
+  </div>
+
+  <!-- M3129 PW -->
+  <div class="card" id="m3129-palladium-white" data-nav="M3129 · Palladium White">
+    <div class="card-head">
+      <h3>M3129</h3>
+      <span class="badge">Optikai szemüveg</span>
+      <span class="badge out">Elfogyott</span>
+    </div>
+    <p class="variant">További színváltozat — Szín: Palladium White (PW)</p>
+    <p class="pdf-link"><a href="M3129%20Rectangular%20Eyeglasses%20%7C%20Official%20Site%20%E2%80%93%20Matsuda.pdf" target="_blank" rel="noopener" data-group="Matsuda" data-title="M3129">📄 M3129 termékoldal (PDF) — az Antique Gold változat oldala</a></p>
+    <div class="gallery">
+      <a href="matsuda-eyewear-m3129-pw-51-front.jpg.webp" target="_blank"><img src="matsuda-eyewear-m3129-pw-51-front.jpg.webp" alt="Matsuda M3129 PW – szemből"></a>
+      <a href="matsuda-eyewear-m3129-pw-51-profile.jpg.webp" target="_blank"><img src="matsuda-eyewear-m3129-pw-51-profile.jpg.webp" alt="Matsuda M3129 PW – oldalnézet"></a>
+    </div>
+    <p class="desc">Az M3129 palládiumfehér színváltozata: ugyanaz a pince-nez kialakítás és könnyű titán szerkezet, mint a fenti Antique Gold változatnál.</p>
+    <details open>
+      <summary>Részletek</summary>
+      <table>
+        <tr><td>Szín</td><td>Palladium White (színkód: PW)</td></tr>
+        <tr><td>Méret (mm)</td><td>51/19–145</td></tr>
+        <tr><td>Illesztés</td><td>Standard</td></tr>
+        <tr><td>Lencse</td><td>Víztiszta (Clear)</td></tr>
+        <tr><td>Gyártói ár (USA)</td><td>725 USD</td></tr>
+        <tr><td>Elérhetőség</td><td>Elfogyott</td></tr>
+      </table>
+    </details>
+    <details class="eval">
+      <summary>Szubjektív értékelés</summary>
+      <div class="eval-body">
+        <p><strong>Összbenyomás</strong>Ugyanaz a különleges pince-nez rajz hűvösebb, modernebb hangon: a palládiumfehér kevésbé „antik”, inkább finom, high-tech hatású, ezért szerintem könnyebben illeszthető mai ruhatárhoz.</p>
+        <p><strong>A keret jellemzése</strong>Azonos forma és szerkezet, mint az Antique Gold változatnál; a világos fémfelület csökkenti a vizuális súlyt, a keret szinte „lebeg” az arcon.</p>
+        <p><strong>Milyen karakternek</strong>Minimalista, designer- vagy építész-alkatnak; aki a részletekben és a szerkezetben gyönyörködik, de a színekben visszafogott.</p>
+        <p><strong>Milyen helyzetben</strong>Iroda, kreatív stúdió, előadás, mindennapi viselet; vékonysága és könnyedsége miatt tartós viselésre is jó.</p>
+        <p><strong>Milyen megjelenéshez</strong>Hideg tónusú ruhatárhoz: szürke, kék, fekete, fehér; ezüst vagy acél színű óra; modern, letisztult stílus.</p>
+        <p><strong>Amire érdemes figyelni</strong>Szintén elfogyott. A halvány fémfelület az arcon kevésbé látszik, ezért akinek határozott, feltűnő keret kell, inkább az Antique Gold vagy más szín mellett dönt.</p>
+        <p class="note">Fotók és adatlap alapján írt, szubjektív vélemény — viselési tapasztalat nélkül.</p>
+      </div>
+    </details>
+    <p class="note">Az adatok a gyártó (matsuda.com) termékoldaláról származnak, 2026. október 3-i lekérdezéssel; külön PDF-adatlap ehhez a színhez nincs a mappában.</p>
+  </div>
+</section>
+
+<!-- ============ MASUNAGA ============ -->
+<section class="brand" id="masunaga">
+  <h2>Masunaga</h2>
+
+  <!-- MOC 004 – A -->
+  <div class="card" id="moc-004-a" data-nav="MOC 004 · Gunmetal / bordó">
+    <div class="card-head">
+      <h3>MOC 004</h3>
+      <span class="badge">Optikai szemüveg</span>
+      <span class="badge new">Új</span>
+    </div>
+    <p class="variant">Masters of Craft (MOC) kollekció · Edition120 · A szín: Brushed Gunmetal / Burgundy – Grey Crystal</p>
+    <p class="pdf-link"><a href="MASTERS%20OF%20CRAFT%20%7C%20A%20First-class%20eyewear%20collection%20from%20master%20craftsmen.%20%7C%20MASUNAGA%20MOC%20%7C%20Masunaga.pdf" target="_blank" rel="noopener" data-group="Masunaga" data-title="MOC 004">📄 Termékoldal megnyitása (PDF)</a></p>
+    <div class="videos">
+      <figure class="video-item"><video src="01.mp4#t=0.1" controls muted playsinline preload="metadata"></video><figcaption>Körbejárás — oldalnézettől szemből és háromnegyed nézetig (8 mp)</figcaption></figure>
+      <figure class="video-item"><video src="02.mp4#t=0.1" controls muted playsinline preload="metadata"></video><figcaption>Makró — zsanér, szárvég-medál, a rétegzett karima (16 mp)</figcaption></figure>
+      <figure class="video-item"><video src="03.mp4#t=0.1" controls muted playsinline preload="metadata"></video><figcaption>Szemből és hátulról — a front és a szárvég (10 mp)</figcaption></figure>
+    </div>
+    <div class="gallery">
+      <a href="04.jpg" target="_blank"><img src="04.jpg" alt="Masunaga MOC 004 A – hátsó háromnegyed nézet"></a>
+      <a href="05.jpg" target="_blank"><img src="05.jpg" alt="Masunaga MOC 004 A – orrhíd és karima közelről"></a>
+      <a href="06.jpg" target="_blank"><img src="06.jpg" alt="Masunaga MOC 004 A – szárvég és MOC medál"></a>
+      <a href="07.jpg" target="_blank"><img src="07.jpg" alt="Masunaga MOC 004 A – zsanér és szár"></a>
+      <a href="08.jpg" target="_blank"><img src="08.jpg" alt="Masunaga MOC 004 A – zsanér és orrtámasz"></a>
+    </div>
+    <p class="desc">Karcsú fémkeret, amelyet a hatszögletű forma modern eleganciája formál: titán és acetát kombinációja, rétegzett karimával, rácsmintás ezüst díszítéssel és a szárvégen sterling ezüst MOC medállal.</p>
+    <details open>
+      <summary>Részletek</summary>
+      <table>
+        <tr><td>Modell</td><td>MOC 004 (Edition120)</td></tr>
+        <tr><td>Kollekció</td><td>Masters of Craft (MOC) — Masunaga, 1905 óta</td></tr>
+        <tr><td>Szín</td><td>A — Brushed Gunmetal / Burgundy – Grey Crystal</td></tr>
+        <tr><td>Díszítés</td><td>Sterling ezüst 925</td></tr>
+        <tr><td>Lencseszélesség</td><td>49 mm</td></tr>
+        <tr><td>Hídszélesség</td><td>22 mm</td></tr>
+        <tr><td>B méret (lencsemagasság)</td><td>42,0 mm</td></tr>
+        <tr><td>Szárhossz</td><td>145 mm</td></tr>
+        <tr><td>Lencseív / frontív</td><td>2 base / 4 base</td></tr>
+        <tr><td>Pantoszkópos szög</td><td>9°</td></tr>
+        <tr><td>Front anyaga</td><td>Titán / acetát</td></tr>
+        <tr><td>Szár anyaga</td><td>Titán / acetát</td></tr>
+        <tr><td>Belső karima</td><td>10,0 mm acetát</td></tr>
+        <tr><td>Ezüst díszítés</td><td>Sterling ezüst 925</td></tr>
+        <tr><td>MOC medál</td><td>Sterling ezüst 925</td></tr>
+        <tr><td>Orrtámasz</td><td>Széles, kétrétegű — biztonságos és elegáns illeszkedésre</td></tr>
+        <tr><td>Más színváltozatok</td><td>B — Antique 12K Gold / Navy – Tortoise · C — Matte Black / Black</td></tr>
+      </table>
+    </details>
+    <details class="eval">
+      <summary>Szubjektív értékelés</summary>
+      <div class="eval-body">
+        <p><strong>Összbenyomás</strong>Technikás, mégis választékos: a hatszögletű front, a rácsmintás ezüst hídlemez és a bordó szárvégek miatt inkább precíziós tárgy, mint hétköznapi keret; a videókon a kidolgozás a legerősebb érv.</p>
+        <p><strong>A keret jellemzése</strong>Lekerekített hatszög front (49/22–145 mm) titán külső réteggel és 10 mm-es acetát belső karimával; a szürke kristály acetát oldalt a lencsét körbeöleli, a szárakon finom csíkos gravírozás és ezüst rácsmintás zsanérblokk fut, a szárvégen 925-ös ezüst MOC medál ül.</p>
+        <p><strong>Milyen karakternek</strong>Precíz, a mechanikus és mérnöki részleteket szerető, de visszafogott karakternek, aki a tárgy kidolgozásán keresztül fejezi ki magát.</p>
+        <p><strong>Milyen helyzetben</strong>Iroda, előadás, konferencia, kreatív stúdió, esti program; kontrasztos, mégis nem hivalkodó, így hivatalosabb környezetben is megállja a helyét.</p>
+        <p><strong>Milyen megjelenéshez</strong>Szürke, antracit, sötétkék és bordó árnyalatok; acél- vagy titán színű óra, bordó vagy sötétbarna bőr kiegészítők; szürke gyapjú zakó, sötét garbó.</p>
+        <p><strong>Amire érdemes figyelni</strong>Csak renderek és adatlap alapján ítélhető meg, a viselési érzet ismeretlen. A 49 mm-es lencse közepes méret; a többrétegű titán–acetát szerkezet vizuálisan súlyosabb, mint egy vékony fémkeret, és részletgazdagsága miatt nagyobb figyelmet kíván a beállításnál. Ár az adatlapon nincs.</p>
+        <p class="note">Renderek, videók és adatlap alapján írt, szubjektív vélemény — viselési tapasztalat nélkül.</p>
+      </div>
+    </details>
+    <p class="note">Az adatok a mappában lévő Masunaga MOC-adatlapból (PDF) származnak; ár nem szerepel rajta. A renderek víztiszta lencsét mutatnak, az adatlap külön nem nevezi meg, hogy optikai vagy napszemüveg-változat.</p>
+  </div>
+
+  <!-- MOC 004 – B -->
+  <div class="card" id="moc-004-b" data-nav="MOC 004 · Arany / tortoise">
+    <div class="card-head">
+      <h3>MOC 004</h3>
+      <span class="badge">Optikai szemüveg</span>
+      <span class="badge new">Új</span>
+    </div>
+    <p class="variant">További színváltozat — B szín: Antique 12K Gold / Navy – Tortoise</p>
+    <p class="pdf-link"><a href="MASTERS%20OF%20CRAFT%20%7C%20A%20First-class%20eyewear%20collection%20from%20master%20craftsmen.%20%7C%20MASUNAGA%20MOC%20%7C%20Masunaga.pdf" target="_blank" rel="noopener" data-group="Masunaga" data-title="MOC 004">📄 MOC 004 adatlap (PDF) — mindhárom színnel</a></p>
+    <div class="videos">
+      <figure class="video-item"><video src="01-2.mp4#t=0.1" controls muted playsinline preload="metadata"></video><figcaption>Körbejárás — oldalnézettől szemből és háromnegyed nézetig (8 mp)</figcaption></figure>
+      <figure class="video-item"><video src="02-2.mp4#t=0.1" controls muted playsinline preload="metadata"></video><figcaption>Makró — zsanér, szárvég-medál, a rétegzett karima (16 mp)</figcaption></figure>
+      <figure class="video-item"><video src="03-2.mp4#t=0.1" controls muted playsinline preload="metadata"></video><figcaption>Szemből és hátulról — a front és a szárvég (10 mp)</figcaption></figure>
+    </div>
+    <div class="gallery">
+      <a href="04-2.jpg" target="_blank"><img src="04-2.jpg" alt="Masunaga MOC 004 B – hátsó háromnegyed nézet"></a>
+      <a href="05-2.jpg" target="_blank"><img src="05-2.jpg" alt="Masunaga MOC 004 B – orrhíd és karima közelről"></a>
+      <a href="06-2.jpg" target="_blank"><img src="06-2.jpg" alt="Masunaga MOC 004 B – szárvég és MOC medál"></a>
+      <a href="07-2.jpg" target="_blank"><img src="07-2.jpg" alt="Masunaga MOC 004 B – zsanér és szár"></a>
+      <a href="08-2.jpg" target="_blank"><img src="08-2.jpg" alt="Masunaga MOC 004 B – zsanér és orrtámasz"></a>
+    </div>
+    <p class="desc">Ugyanaz a hatszögletű, rétegzett titán–acetát szerkezet melegebb, klasszikusabb hangon: antik 12 karátos arany fém, sötétkék szárak és tortoise (teknősmintás) acetát.</p>
+    <details open>
+      <summary>Részletek</summary>
+      <table>
+        <tr><td>Szín</td><td>B — Antique 12K Gold / Navy – Tortoise</td></tr>
+        <tr><td>Díszítés</td><td>Sterling ezüst 925</td></tr>
+        <tr><td>Méret (mm)</td><td>49/22–145 (B méret: 42,0) — azonos az A változattal</td></tr>
+        <tr><td>Anyag</td><td>Titán / acetát (front és szár)</td></tr>
+        <tr><td>Más színváltozatok</td><td>A — Brushed Gunmetal / Burgundy – Grey Crystal · C — Matte Black / Black</td></tr>
+      </table>
+    </details>
+    <details class="eval">
+      <summary>Szubjektív értékelés</summary>
+      <div class="eval-body">
+        <p><strong>Összbenyomás</strong>Az A változat hűvös, műszeres hangja itt klasszikus, meleg eleganciává változik: az antik arany fém, a tortoise acetát és a sötétkék szárak együtt a válogatás egyik legharmonikusabb színpárosítását adják.</p>
+        <p><strong>A keret jellemzése</strong>Azonos forma és szerkezet, mint az A változatnál; a teknősmintás acetát belül és oldalt melegséget ad, a sötétkék betétek és szárak pedig fegyelmezetten tartják a fényes arany hatást.</p>
+        <p><strong>Milyen karakternek</strong>Régivilági eleganciát, kézművességet és tárgykultúrát értékelő, kifinomult karakternek, aki a részletekben gondolkodik, és nem bánja, ha kérdeznek a keretéről.</p>
+        <p><strong>Milyen helyzetben</strong>Galéria, színház, vacsora, előadás, kreatív iroda; egy jó zakóhoz vagy öltönyhöz éppúgy illik, mint egy hétvégi kabáthoz.</p>
+        <p><strong>Milyen megjelenéshez</strong>Tweed, kordbársony, sötétkék és barna tónusok, selyem nyakkendő; arany színű óra, barna bőr kiegészítők; őszi-téli, meleg ruhatár.</p>
+        <p><strong>Amire érdemes figyelni</strong>Viselési tapasztalat nélkül, csak renderek alapján; a meleg arany nem áll jól mindenkinek hideg tónusú ruhatárhoz. A 12 karátos arany felület és a rétegzett szerkezet gondosabb kezelést kíván. Ár az adatlapon nincs.</p>
+        <p class="note">Renderek, videók és adatlap alapján írt, szubjektív vélemény — viselési tapasztalat nélkül.</p>
+      </div>
+    </details>
+    <p class="note">Az adatok a Masunaga MOC-adatlapból (PDF) származnak; a videók és a képek a mappa új, „-2” végű fájljai.</p>
+  </div>
+</section>
+
+<!-- ============ AHLEM ============ -->
+<section class="brand" id="ahlem">
+  <h2>Ahlem</h2>
+
+  <!-- NEW YORK – GREY GOLD -->
+  <div class="card" id="ahlem-new-york-grey-gold" data-nav="New York · Grey Gold">
+    <div class="card-head">
+      <h3>New York</h3>
+      <span class="badge">Optikai szemüveg</span>
+      <span class="price">620 USD</span>
+    </div>
+    <p class="variant">Fall Winter 2026 · Optical kollekció · Szín: Grey Gold</p>
+    <p class="pdf-link"><a href="AHLEM%20%7C%20Optical%20%7C%20New%20York.pdf" target="_blank" rel="noopener" data-group="Ahlem" data-title="New York — Grey Gold">📄 Termékoldal megnyitása (PDF)</a></p>
+    <div class="gallery">
+      <a href="ahlem-new-york-greygold-1.jpg" target="_blank"><img src="ahlem-new-york-greygold-1.jpg" alt="Ahlem New York Grey Gold – szemből"></a>
+      <a href="ahlem-new-york-greygold-2.jpg" target="_blank"><img src="ahlem-new-york-greygold-2.jpg" alt="Ahlem New York Grey Gold – háromnegyed nézet"></a>
+      <a href="ahlem-new-york-greygold-3.jpg" target="_blank"><img src="ahlem-new-york-greygold-3.jpg" alt="Ahlem New York Grey Gold – közeli, felső léc és zsanér"></a>
+      <a href="ahlem-new-york-case.jpg" target="_blank"><img src="ahlem-new-york-case.jpg" alt="Ahlem tok és kendő"></a>
+    </div>
+    <p class="desc">Minden csoportban van egy tempót diktáló, magabiztos gondolkodó, aki a múltat és a jövőt egyszerre tudja szintetizálni. A New York felső léce a pilótakeretek ikonikus formáját idézi, hídmentes szerkezete és újszerű szögei viszont a jövőből valók.</p>
+    <details open>
+      <summary>Részletek</summary>
+      <table>
+        <tr><td>Modell</td><td>New York</td></tr>
+        <tr><td>Kollekció</td><td>Optical (Fall Winter 2026)</td></tr>
+        <tr><td>Szín</td><td>Grey Gold</td></tr>
+        <tr><td>Lencseszélesség</td><td>50 mm</td></tr>
+        <tr><td>Hídszélesség</td><td>18 mm</td></tr>
+        <tr><td>Szárhossz</td><td>150 mm</td></tr>
+        <tr><td>Forma</td><td>Pilótakeret-ihletésű felső léc (top bar), hídmentes szerkezet</td></tr>
+        <tr><td>Anyag</td><td>Fém alap, palládiummal és 22 karátos arannyal galvanizálva</td></tr>
+        <tr><td>Díszítés</td><td>Kézzel kalapált felső léc, letörött (beveled) karima és szárak</td></tr>
+        <tr><td>Szárvég</td><td>Jellegzetes kör és háromszög forma, kézzel festett részlettel</td></tr>
+        <tr><td>Orrpárna</td><td>Titán — nem reagáló, hipoallergén</td></tr>
+        <tr><td>Más színváltozatok</td><td>Champagne</td></tr>
+        <tr><td>Opció</td><td>Kékfény-szűrő lencse: +150 USD</td></tr>
+        <tr><td>Gyártói ár (USA)</td><td>620 USD</td></tr>
+        <tr><td>Származási hely</td><td>Franciaországban kézzel készült</td></tr>
+      </table>
+    </details>
+    <details class="eval">
+      <summary>Szubjektív értékelés</summary>
+      <div class="eval-body">
+        <p><strong>Összbenyomás</strong>Légies, rajzszerű pilótakeret: a vékony drót, a kalapált felső léc és a hídmentes vonal együtt ritkán látott, grafikus hatást adnak; a Grey Gold árnyalat a leghűvösebb, legmodernebb olvasata.</p>
+        <p><strong>A keret jellemzése</strong>Trapéz-szerű, széles lencsék (50 mm) vékony fémdróton, a lencsék felett egyenes, kalapált felső léc, hosszú (150 mm) szárak a jellegzetes kör–háromszög szárvéggel; a szárak vége a fotókon nyitott, vonalszerű hurokként látszik. Szinte súlytalan hatású.</p>
+        <p><strong>Milyen karakternek</strong>Magabiztos, modern, vizuális műveltséggel és a pilótakeretek klasszikusaihoz fűződő viszonnyal rendelkező karakternek, aki a dísztelen, mégis egyedi vonalakat szereti.</p>
+        <p><strong>Milyen helyzetben</strong>Iroda, kutatás, előadás, konferencia, hétköznapi viselet, utazás; visszafogott, ezért mindennapi keretnek is jó.</p>
+        <p><strong>Milyen megjelenéshez</strong>Hideg tónusú ruhatár: szürke, sötétkék, fekete, fehér; ezüst vagy acél színű óra; vászonzakó, finom kötött pulóver, farmer.</p>
+        <p><strong>Amire érdemes figyelni</strong>Csak fotók és adatlap alapján ítélhető meg. A vékony drótszerkezet kényes, könnyen elhajlik, ezért jó optikus kell az állításhoz; a 150 mm-es szár hosszú, kisebb fejnél előfordulhat, hogy érdemes rövidíteni. Az adatlap hídmentes szerkezetről beszél, a megadott 18 mm-es híd ennek az összekötő elemnek a mérete lehet; ezt érdemes a gyártóval vagy a boltban tisztázni.</p>
+        <p class="note">Fotók és adatlap alapján írt, szubjektív vélemény — viselési tapasztalat nélkül.</p>
+      </div>
+    </details>
+    <p class="note">Az ár, az anyag- és díszítési adatok a mappában lévő Ahlem-termékoldalakból (PDF) származnak; a méreteket (50/18–150) te adtad meg, az elmentett oldalakon nem szerepelnek. A leírás hídmentes szerkezetet említ, a 18 mm-es hídméret a megadott adat.</p>
+  </div>
+
+  <!-- NEW YORK – CHAMPAGNE -->
+  <div class="card" id="ahlem-new-york-champagne" data-nav="New York · Champagne">
+    <div class="card-head">
+      <h3>New York</h3>
+      <span class="badge">Optikai szemüveg</span>
+      <span class="price">620 USD</span>
+    </div>
+    <p class="variant">További színváltozat — Szín: Champagne</p>
+    <p class="pdf-link"><a href="AHLEM%20%7C%20Optical%20%7C%20New%20York-champagne.pdf" target="_blank" rel="noopener" data-group="Ahlem" data-title="New York — Champagne">📄 Termékoldal megnyitása (PDF) — Champagne</a></p>
+    <div class="gallery">
+      <a href="ahlem-new-york-champagne-1.jpg" target="_blank"><img src="ahlem-new-york-champagne-1.jpg" alt="Ahlem New York Champagne – szemből"></a>
+      <a href="ahlem-new-york-champagne-2.jpg" target="_blank"><img src="ahlem-new-york-champagne-2.jpg" alt="Ahlem New York Champagne – háromnegyed nézet"></a>
+      <a href="ahlem-new-york-champagne-3.jpg" target="_blank"><img src="ahlem-new-york-champagne-3.jpg" alt="Ahlem New York Champagne – közeli, felső léc és zsanér"></a>
+      <a href="ahlem-new-york-case.jpg" target="_blank"><img src="ahlem-new-york-case.jpg" alt="Ahlem tok és kendő"></a>
+    </div>
+    <p class="desc">A New York champagne színben: ugyanaz a pilótaformájú, hídmentes szerkezet, melegebb, mélyebb arany hatással.</p>
+    <details open>
+      <summary>Részletek</summary>
+      <table>
+        <tr><td>Szín</td><td>Champagne</td></tr>
+        <tr><td>Lencseszélesség</td><td>50 mm</td></tr>
+        <tr><td>Hídszélesség</td><td>18 mm</td></tr>
+        <tr><td>Szárhossz</td><td>150 mm</td></tr>
+        <tr><td>Anyag</td><td>Fém alap, palládiummal és 22 karátos arannyal galvanizálva</td></tr>
+        <tr><td>Díszítés</td><td>Kézzel kalapált felső léc, letörött karima és szárak; kör és háromszög szárvég kézzel festett részlettel</td></tr>
+        <tr><td>Orrpárna</td><td>Titán — nem reagáló, hipoallergén</td></tr>
+        <tr><td>Gyártói ár (USA)</td><td>620 USD</td></tr>
+        <tr><td>Más színváltozatok</td><td>Grey Gold</td></tr>
+        <tr><td>Származási hely</td><td>Franciaországban kézzel készült</td></tr>
+      </table>
+    </details>
+    <details class="eval">
+      <summary>Szubjektív értékelés</summary>
+      <div class="eval-body">
+        <p><strong>Összbenyomás</strong>Ugyanaz a grafikus pilótarajz, de a champagne arany sokkal emberibb, melegebb hangot ad neki: elegánsabb, kevésbé „technikai”, mint a Grey Gold.</p>
+        <p><strong>A keret jellemzése</strong>Azonos forma és szerkezet; a melegebb arany a kalapált felső léc és a letörött karima fényjátékát kiemeli, így a keret közelről is több részletet mutat.</p>
+        <p><strong>Milyen karakternek</strong>Klasszikus eleganciát és kézműves részleteket értékelő, kifinomult karakternek, aki a pilótaformát nem sportos, hanem finom, retró jelentésében szereti.</p>
+        <p><strong>Milyen helyzetben</strong>Vacsora, galéria, színház, előadás, kreatív iroda; zakóhoz, nyakkendőhöz is jól illik.</p>
+        <p><strong>Milyen megjelenéshez</strong>Meleg tónusok: barna, drappos, tengerészkék, burgundi; arany színű óra, bőr kiegészítők; vászon- vagy tweed zakó.</p>
+        <p><strong>Amire érdemes figyelni</strong>Viselési tapasztalat nélkül, fotók alapján; a meleg arany nem áll jól mindenkinek hideg tónusú ruhatárhoz. A vékony drótkeret kényes, beállítása gondosságot kíván; a 150 mm-es szár hosszú, kisebb fejnél rövidíteni lehet.</p>
+        <p class="note">Fotók és adatlap alapján írt, szubjektív vélemény — viselési tapasztalat nélkül.</p>
+      </div>
+    </details>
+    <p class="note">Az adatok az Ahlem-termékoldal (PDF) alapján szerepelnek; a méreteket te adtad meg, azok a Grey Gold változattal azonosak.</p>
+  </div>
+</section>
+
+<!-- ============ EGYMÁS MELLETT ============ -->
+<section class="compare" id="osszehasonlitas">
+  <h2>Egymás mellett</h2>
+  <div class="compare-grid">
+    <div class="compare-item" data-img="ARGO_AKX_538B_55_2.jpg" data-cap="Akoni Argo – Havana / 12k arany">
+      <img src="ARGO_AKX_538B_55_2.jpg" alt="Akoni Argo">
+      <div class="c-name">Argo</div>
+      <div class="c-info">Akoni · Optikai</div>
+      <div class="c-price">&nbsp;</div>
+    </div>
+    <div class="compare-item" data-img="AGILE_AKX_416B_41_2.jpg" data-cap="Akoni Agile – matt antikolt ezüst / kristálykék-szürke">
+      <img src="AGILE_AKX_416B_41_2.jpg" alt="Akoni Agile">
+      <div class="c-name">Agile</div>
+      <div class="c-info">Akoni · Optikai</div>
+      <div class="c-price">&nbsp;</div>
+    </div>
+    <div class="compare-item" data-img="SOLIS_AKS_507E_51_2.jpg" data-cap="Akoni Solis – Black Iron / bronz">
+      <img src="SOLIS_AKS_507E_51_2.jpg" alt="Akoni Solis">
+      <div class="c-name">Solis</div>
+      <div class="c-info">Akoni · Napszemüveg</div>
+      <div class="c-price">482.000 Ft</div>
+    </div>
+    <div class="compare-item" data-img="SPRINT_AKS_504A_55-2_HD.jpg" data-cap="Akoni Sprint-A – csiszolt fehérarany">
+      <img src="SPRINT_AKS_504A_55-2_HD.jpg" alt="Akoni Sprint-A fehérarany">
+      <div class="c-name">Sprint-A</div>
+      <div class="c-info">Akoni · Fehérarany</div>
+      <div class="c-price">396.800 Ft</div>
+    </div>
+    <div class="compare-item" data-img="SPRINT-A_AKS_504E_55_2.jpg" data-cap="Akoni Sprint-A – csiszolt arany">
+      <img src="SPRINT-A_AKS_504E_55_2.jpg" alt="Akoni Sprint-A arany">
+      <div class="c-name">Sprint-A</div>
+      <div class="c-info">Akoni · Arany</div>
+      <div class="c-price">396.800 Ft</div>
+    </div>
+    <div class="compare-item" data-img="SPRINT_AKS_504C_55-2_HD.jpg" data-cap="Akoni Sprint-A – AKS-504C színváltozat">
+      <img src="SPRINT_AKS_504C_55-2_HD.jpg" alt="Akoni Sprint-A 504C">
+      <div class="c-name">Sprint-A</div>
+      <div class="c-info">Akoni · 504C változat</div>
+      <div class="c-price">&nbsp;</div>
+    </div>
+    <div class="compare-item" data-img="Delage_Etna_RX_Front_Cropped_5377x3585_wiut2u.jpg" data-cap="Jacques Marie Mage Delage – Etna">
+      <img src="Delage_Etna_RX_Front_Cropped_5377x3585_wiut2u.jpg" alt="JMM Delage">
+      <div class="c-name">Delage — Etna</div>
+      <div class="c-info">Jacques Marie Mage · Optikai</div>
+      <div class="c-price">1.075 USD</div>
+    </div>
+    <div class="compare-item" data-img="Evans_Aegen_Front_Cropped_5377x3585_exyuhg_yevg1w.jpg.webp" data-cap="Jacques Marie Mage Evans – Aegen">
+      <img src="Evans_Aegen_Front_Cropped_5377x3585_exyuhg_yevg1w.jpg.webp" alt="JMM Evans">
+      <div class="c-name">Evans — Aegen</div>
+      <div class="c-info">Jacques Marie Mage · Optikai</div>
+      <div class="c-price">940 EUR</div>
+    </div>
+    <div class="compare-item" data-img="Eiko_Agar_RX_Front_Cropped_5377x3585_vpcbgk.jpg.webp" data-cap="Jacques Marie Mage Eiko – Agar">
+      <img src="Eiko_Agar_RX_Front_Cropped_5377x3585_vpcbgk.jpg.webp" alt="JMM Eiko">
+      <div class="c-name">Eiko — Agar</div>
+      <div class="c-info">Jacques Marie Mage · Optikai</div>
+      <div class="c-price">940 EUR</div>
+    </div>
+    <div class="compare-item" data-img="matsuda-eyewear-10103h-pw-mbk-41-front.png.webp" data-cap="Matsuda 10103H – Heritage, kerek">
+      <img src="matsuda-eyewear-10103h-pw-mbk-41-front.png.webp" alt="Matsuda 10103H">
+      <div class="c-name">10103H</div>
+      <div class="c-info">Matsuda · Optikai</div>
+      <div class="c-price">282.900 Ft</div>
+    </div>
+    <div class="compare-item" data-img="58cf565e01d104b5b872ce388816a1fe.jpg.webp" data-cap="Matsuda M2062 – matt fekete / arany">
+      <img src="58cf565e01d104b5b872ce388816a1fe.jpg.webp" alt="Matsuda M2062">
+      <div class="c-name">M2062</div>
+      <div class="c-info">Matsuda · Optikai</div>
+      <div class="c-price">328.200 Ft</div>
+    </div>
+    <div class="compare-item" data-img="matsuda-eyewear-m3129-ag-51-front.jpg.webp" data-cap="Matsuda M3129 – Antique Gold">
+      <img src="matsuda-eyewear-m3129-ag-51-front.jpg.webp" alt="Matsuda M3129">
+      <div class="c-name">M3129</div>
+      <div class="c-info">Matsuda · Optikai · Antik arany</div>
+      <div class="c-price">Elfogyott</div>
+    </div>
+    <div class="compare-item" data-img="matsuda-eyewear-m3129-pw-51-front.jpg.webp" data-cap="Matsuda M3129 – Palladium White">
+      <img src="matsuda-eyewear-m3129-pw-51-front.jpg.webp" alt="Matsuda M3129">
+      <div class="c-name">M3129</div>
+      <div class="c-info">Matsuda · Optikai · Palladium</div>
+      <div class="c-price">Elfogyott</div>
+    </div>
+    <div class="compare-item" data-img="04.jpg" data-cap="Masunaga MOC 004 – Brushed Gunmetal / Burgundy">
+      <img src="04.jpg" alt="Masunaga MOC 004 A">
+      <div class="c-name">MOC 004</div>
+      <div class="c-info">Masunaga · Gunmetal / bordó</div>
+      <div class="c-price">&nbsp;</div>
+    </div>
+    <div class="compare-item" data-img="04-2.jpg" data-cap="Masunaga MOC 004 – Antique 12K Gold / Navy – Tortoise">
+      <img src="04-2.jpg" alt="Masunaga MOC 004 B">
+      <div class="c-name">MOC 004</div>
+      <div class="c-info">Masunaga · Arany / tortoise</div>
+      <div class="c-price">&nbsp;</div>
+    </div>
+    <div class="compare-item" data-img="ahlem-new-york-greygold-1.jpg" data-cap="Ahlem New York – Grey Gold">
+      <img src="ahlem-new-york-greygold-1.jpg" alt="Ahlem New York Grey Gold">
+      <div class="c-name">New York</div>
+      <div class="c-info">Ahlem · Grey Gold</div>
+      <div class="c-price">620 USD</div>
+    </div>
+    <div class="compare-item" data-img="ahlem-new-york-champagne-1.jpg" data-cap="Ahlem New York – Champagne">
+      <img src="ahlem-new-york-champagne-1.jpg" alt="Ahlem New York Champagne">
+      <div class="c-name">New York</div>
+      <div class="c-info">Ahlem · Champagne</div>
+      <div class="c-price">620 USD</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  A katalógus a mappában található termékoldalak (PDF), termékfotók és videók alapján készült · 2026
+</footer>
+
+<!-- ============ LIGHTBOX ============ -->
+<div class="lightbox" id="lightbox">
+  <button class="lb-btn lb-close" title="Bezárás (Esc)">✕</button>
+  <button class="lb-btn lb-prev" title="Előző (←)">‹</button>
+  <img id="lb-img" src="" alt="">
+  <button class="lb-btn lb-next" title="Következő (→)">›</button>
+  <div class="lb-caption" id="lb-caption"></div>
+</div>
+
+<script>
+(function(){
+  var lb = document.getElementById('lightbox');
+  var lbImg = document.getElementById('lb-img');
+  var lbCap = document.getElementById('lb-caption');
+  var items = [];   // {src, cap}
+  var idx = 0;
+
+  function show(i){
+    idx = (i + items.length) % items.length;
+    lbImg.src = items[idx].src;
+    lbCap.textContent = items[idx].cap + '  ·  ' + (idx+1) + ' / ' + items.length;
+  }
+  function open(list, i){
+    items = list;
+    lb.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    show(i);
+  }
+  function close(){
+    lb.classList.remove('open');
+    document.body.style.overflow = '';
+    lbImg.src = '';
+  }
+
+  // Kártyagalériák: egy kártyán belül lapozható
+  document.querySelectorAll('.gallery').forEach(function(gal){
+    var links = Array.prototype.slice.call(gal.querySelectorAll('a'));
+    var list = links.map(function(a){
+      return { src: a.getAttribute('href'), cap: a.querySelector('img').alt };
+    });
+    links.forEach(function(a, i){
+      a.addEventListener('click', function(e){
+        e.preventDefault();
+        open(list, i);
+      });
+    });
+  });
+
+  // Összehasonlító nézet: a modellek között lapozható
+  var compareItems = Array.prototype.slice.call(document.querySelectorAll('.compare-item'));
+  var compareList = compareItems.map(function(el){
+    return { src: el.dataset.img, cap: el.dataset.cap };
+  });
+  compareItems.forEach(function(el, i){
+    el.addEventListener('click', function(){ open(compareList, i); });
+  });
+
+  lb.querySelector('.lb-prev').addEventListener('click', function(e){ e.stopPropagation(); show(idx-1); });
+  lb.querySelector('.lb-next').addEventListener('click', function(e){ e.stopPropagation(); show(idx+1); });
+  lb.querySelector('.lb-close').addEventListener('click', function(e){ e.stopPropagation(); close(); });
+  lb.addEventListener('click', function(e){ if(e.target === lb) close(); });
+
+  document.addEventListener('keydown', function(e){
+    if(!lb.classList.contains('open')) return;
+    if(e.key === 'Escape') close();
+    else if(e.key === 'ArrowLeft') show(idx-1);
+    else if(e.key === 'ArrowRight') show(idx+1);
+  });
+
+  // Érintéses lapozás (swipe)
+  var touchX = null;
+  lb.addEventListener('touchstart', function(e){ touchX = e.touches[0].clientX; }, {passive:true});
+  lb.addEventListener('touchend', function(e){
+    if(touchX === null) return;
+    var dx = e.changedTouches[0].clientX - touchX;
+    if(Math.abs(dx) > 50) show(dx > 0 ? idx-1 : idx+1);
+    touchX = null;
+  }, {passive:true});
+})();
+</script>
+
+
+<!-- ============ PDF MODAL ============ -->
+<div class="pdf-modal" id="pdf-modal" role="dialog" aria-modal="true" aria-label="Termékoldal (PDF)">
+  <div class="pdf-box">
+    <div class="pdf-bar">
+      <button id="pdf-prev" title="Előző PDF">‹ Előző</button>
+      <button id="pdf-next" title="Következő PDF">Következő ›</button>
+      <select class="pdf-select" id="pdf-select" aria-label="PDF kiválasztása"></select>
+      <div class="pdf-title" id="pdf-title"></div>
+      <a class="pdf-btn" id="pdf-newtab" href="#" target="_blank" rel="noopener">Megnyitás új lapon ↗</a>
+      <button id="pdf-close" title="Bezárás (Esc)">✕ Bezárás</button>
+    </div>
+    <div class="pdf-body">
+      <nav class="pdf-side" id="pdf-side"></nav>
+      <div class="pdf-frame-wrap">
+        <div class="pdf-loading" id="pdf-loading">PDF betöltése…</div>
+        <iframe id="pdf-frame" title="PDF" src="about:blank"></iframe>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var modal = document.getElementById('pdf-modal');
+  var frame = document.getElementById('pdf-frame');
+  var loading = document.getElementById('pdf-loading');
+  var side = document.getElementById('pdf-side');
+  var sel = document.getElementById('pdf-select');
+  var titleEl = document.getElementById('pdf-title');
+  var newTab = document.getElementById('pdf-newtab');
+  var entries = [], byHref = {}, cur = -1, loadTimer = null;
+
+  // A PDF-linkekből épül a lista (azonos PDF csak egyszer szerepel)
+  Array.prototype.forEach.call(document.querySelectorAll('.pdf-link a'), function(a){
+    var h = a.getAttribute('href');
+    if(!byHref[h]){
+      byHref[h] = { href:h, group:a.dataset.group || 'Egyéb', title:a.dataset.title || h };
+      entries.push(byHref[h]);
+    }
+  });
+
+  // Oldalsó lista (márkánként csoportosítva) + legördülő mobilra
+  var lastGroup = null;
+  entries.forEach(function(e, i){
+    if(e.group !== lastGroup){
+      var h = document.createElement('h4'); h.textContent = e.group; side.appendChild(h);
+      lastGroup = e.group;
+    }
+    var b = document.createElement('button');
+    b.type = 'button'; b.textContent = e.title; b.dataset.i = i;
+    b.addEventListener('click', function(){ show(i); });
+    side.appendChild(b);
+    var o = document.createElement('option');
+    o.value = i; o.textContent = e.group + ' · ' + e.title; sel.appendChild(o);
+  });
+  sel.addEventListener('change', function(){ show(parseInt(sel.value, 10)); });
+
+  function show(i){
+    cur = (i + entries.length) % entries.length;
+    var e = entries[cur];
+    loading.classList.remove('hide');
+    clearTimeout(loadTimer);
+    loadTimer = setTimeout(function(){ loading.classList.add('hide'); }, 20000);
+    frame.src = e.href + '#view=FitH';
+    titleEl.textContent = e.group + ' — ' + e.title;
+    newTab.href = e.href;
+    sel.value = cur;
+    Array.prototype.forEach.call(side.querySelectorAll('button'), function(b){
+      var on = parseInt(b.dataset.i, 10) === cur;
+      b.classList.toggle('active', on);
+      if(on && b.scrollIntoView) b.scrollIntoView({block:'nearest'});
+    });
+  }
+  frame.addEventListener('load', function(){
+    if(frame.getAttribute('src') !== 'about:blank'){ loading.classList.add('hide'); clearTimeout(loadTimer); }
+  });
+
+  function open(href){
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    var i = entries.findIndex ? entries.findIndex(function(e){ return e.href === href; }) : 0;
+    show(i < 0 ? 0 : i);
+  }
+  function close(){
+    modal.classList.remove('open');
+    document.body.style.overflow = '';
+    clearTimeout(loadTimer);
+    frame.src = 'about:blank';   // memória felszabadítása
+  }
+
+  // Kattintás a kártyákon lévő linkeken; Cmd/Ctrl/Shift+kattintás a megszokott módon új lapon nyit
+  Array.prototype.forEach.call(document.querySelectorAll('.pdf-link a'), function(a){
+    a.addEventListener('click', function(ev){
+      if(ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.button === 1) return;
+      ev.preventDefault();
+      open(a.getAttribute('href'));
+    });
+  });
+
+  document.getElementById('pdf-prev').addEventListener('click', function(){ show(cur - 1); });
+  document.getElementById('pdf-next').addEventListener('click', function(){ show(cur + 1); });
+  document.getElementById('pdf-close').addEventListener('click', close);
+  modal.addEventListener('click', function(ev){ if(ev.target === modal) close(); });
+  document.addEventListener('keydown', function(ev){
+    if(!modal.classList.contains('open')) return;
+    if(ev.key === 'Escape') close();
+    else if(ev.key === 'ArrowLeft' && ev.altKey) show(cur - 1);
+    else if(ev.key === 'ArrowRight' && ev.altKey) show(cur + 1);
+  });
+})();
+</script>
+
+<script>
+(function(){
+  var vids = Array.prototype.slice.call(document.querySelectorAll('.video-item video'));
+  vids.forEach(function(v){
+    v.addEventListener('play', function(){
+      vids.forEach(function(o){ if(o !== v && !o.paused) o.pause(); });
+    });
+  });
+})();
+</script>
+
+<script>
+(function(){
+  var nav = document.getElementById('sidenav');
+  var toggle = document.getElementById('sn-toggle');
+  var backdrop = document.getElementById('sn-backdrop');
+  var entries = [];   // {el, link}
+
+  function add(cls, text, el){
+    var a = document.createElement('a');
+    a.className = 'sn-link ' + cls;
+    a.href = '#' + el.id;
+    a.textContent = text;
+    nav.appendChild(a);
+    entries.push({ el: el, link: a });
+    return a;
+  }
+
+  var t = document.createElement('div');
+  t.className = 'sn-title'; t.textContent = 'Szemüvegek';
+  nav.appendChild(t);
+
+  Array.prototype.forEach.call(document.querySelectorAll('section.brand'), function(sec){
+    if(!sec.id) return;
+    add('sn-brand', sec.querySelector('h2').textContent, sec);
+    Array.prototype.forEach.call(sec.querySelectorAll('.card'), function(card, i){
+      if(!card.id) card.id = sec.id + '-' + (i+1);
+      var label = card.dataset.nav || card.querySelector('h3').textContent;
+      add('sn-item', label, card);
+    });
+  });
+  var cmp = document.getElementById('osszehasonlitas');
+  if(cmp){
+    var wrap = document.createElement('div'); wrap.className = 'sn-extra'; nav.appendChild(wrap);
+    var a = add('sn-brand', 'Egymás mellett', cmp);
+    wrap.appendChild(a);
+  }
+
+  function setOpen(on){
+    document.body.classList.toggle('nav-open', on);
+    toggle.setAttribute('aria-expanded', on ? 'true' : 'false');
+    toggle.textContent = on ? '✕ Bezár' : '☰ Lista';
+  }
+  toggle.addEventListener('click', function(){ setOpen(!document.body.classList.contains('nav-open')); });
+  backdrop.addEventListener('click', function(){ setOpen(false); });
+  nav.addEventListener('click', function(e){ if(e.target.closest && e.target.closest('a')) setOpen(false); });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && document.body.classList.contains('nav-open')) setOpen(false);
+  });
+
+  // Aktuális elem kiemelése görgetéskor
+  var ticking = false, current = null;
+  function update(){
+    ticking = false;
+    var cur = null;
+    for(var i = 0; i < entries.length; i++){
+      if(entries[i].el.getBoundingClientRect().top <= 140) cur = entries[i]; else break;
+    }
+    if(cur === current) return;
+    current = cur;
+    entries.forEach(function(e){ e.link.classList.toggle('active', e === cur); });
+    if(cur){
+      var l = cur.link, top = l.offsetTop, h = l.offsetHeight;
+      if(top < nav.scrollTop + 40) nav.scrollTop = Math.max(0, top - 60);
+      else if(top + h > nav.scrollTop + nav.clientHeight - 20) nav.scrollTop = top + h - nav.clientHeight + 60;
+    }
+  }
+  window.addEventListener('scroll', function(){ if(!ticking){ ticking = true; requestAnimationFrame(update); } }, {passive:true});
+  window.addEventListener('resize', update);
+  update();
+})();
+</script>
+
+</body>
+</html>
